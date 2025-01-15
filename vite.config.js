@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: "/icm_lib/src",
+  base: "/icm_lib/",
   build: {
     sourcemap: true, // Disable source maps
   },

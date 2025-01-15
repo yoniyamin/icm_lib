@@ -1,0 +1,209 @@
+/* Updated styles in App.css for better responsiveness on both PC and mobile */
+
+/* Root container adjustments for responsive layout */
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 16px;
+  text-align: center; /* Align text to the center for mixed language content */
+}
+
+.app-container {
+  padding: 8px;
+  text-align: center; /* Align text to the center for mixed language content */
+}
+
+@media (min-width: 640px) {
+  .app-container {
+    padding: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-container {
+    padding: 24px;
+  }
+}
+
+/* QR scanner container styles */
+.qr-scanner-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center; /* Align text to the center for mixed language content */
+}
+
+.qr-scanner-container input[type="file"] {
+  display: block;
+  margin: 10px auto;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.qr-scanner-container p {
+  text-align: center;
+  font-size: 14px;
+  color: #888;
+}
+
+/* Borrower and Book Selection Dropdowns */
+.select-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .select-container {
+    flex-direction: row;
+  }
+}
+
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Borrow and Return buttons */
+.tab-button {
+  flex: 1;
+  padding: 12px;
+  margin: 5px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.tab-button:hover {
+  background-color: #e5e5e5;
+}
+
+@media (min-width: 640px) {
+  .tab-button {
+    font-size: 18px;
+  }
+}
+
+/* Loan History Cards (General Styling) */
+.loan-history-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 20px;
+  justify-content: center; /* Center items inside the container */
+}
+
+.loan-history-container.rtl {
+  direction: rtl; /* Ensure entire container respects RTL */
+}
+
+.loan-history-card {
+  width: 100%;
+  max-width: 300px;
+  padding: 16px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: left; /* Default for LTR */
+  display: block; /* 🔥 No more Flex on the card itself */
+  transition: background-color 0.3s;
+}
+
+.loan-history-card.active-loan {
+  background-color: #FEC43C; /* Highlight active loans in yellow */
+}
+
+.loan-history-card:hover {
+  background-color: #f9f9f9;
+}
+
+.loan-history-card-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.loan-history-card-detail {
+  margin-bottom: 4px;
+}
+
+/* Cancel Button for QR Scanner */
+.qr-scanner-container button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background-color: #F38181;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.qr-scanner-container button:hover {
+  background-color: #e06767;
+}
+
+/* Responsive adjustments for cards on smaller screens */
+@media (max-width: 640px) {
+  .loan-history-card {
+    font-size: 14px;
+  }
+}
+
+/* Bootstrap label adjustments for cross-platform compatibility */
+.label {
+  display: inline-block;
+  padding: 0.5em 1em;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  text-align: center; /* Align text to the center for mixed language content */
+}
+
+@media (max-width: 640px) {
+  .label {
+    font-size: 12px;
+    padding: 0.4em 0.8em;
+  }
+}
+
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+/* RTL-specific fixes for loan-history-card */
+.loan-history-card.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.loan-history-card.rtl .loan-history-card-title {
+  text-align: right;
+}
+
+.loan-history-card.rtl .loan-history-card-detail {
+  text-align: right;
+}
+
+/* Flexbox fixes for RTL layout */
+.loan-history-container.rtl .loan-history-card {
+  margin-left: auto; /* Reverse margin for proper spacing */
+  margin-right: 0;
+}

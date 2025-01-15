@@ -1,0 +1,6 @@
+Dear {loan.borrower_name},
+It's time to return the book {loan.book_title} you borrowed on {loan.borrowed_at}.
+Please don't forget as other kids might be waiting for it.
+
+Thanks,
+ICM Library public

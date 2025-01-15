@@ -1,0 +1,30 @@
+/* index.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.tab-button {
+    @apply text-gray-700 font-semibold py-2 px-4 rounded-md hover:bg-gray-100;
+}
+
+.tab-button.active {
+    @apply text-turquoise font-bold border-b-2 border-turquoise;
+}
+
+.input {
+    @apply border border-gray-300 rounded-md w-full py-2 px-4 focus:outline-none focus:ring-2 focus:ring-turquoise;
+}
+
+.add-button {
+    @apply bg-coral text-white font-semibold py-2 rounded-md hover:bg-softRed;
+}
+
+.book-card {
+    @apply bg-white shadow-md rounded-lg p-4 border border-gray-200;
+}
+
+.book-title {
+    @apply font-bold text-gray-800 mb-1;
+}
+

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import Select from 'react-select';
 import { QrCode, Mail } from 'lucide-react';
-import { fetchMembers, fetchAvailableBooks, fetchBookByQRCode, borrowBook, fetchBorrowingHistory, returnBook, fetchOpenLoans,
+import { fetchMembers, fetchAvailableBooks, fetchBookByQRCode, borrowBook, returnBook,
     fetchBorrowedBooks, fetchLoanHistory, sendReminder, fetchLastReminderForLoan } from '../services/loanService';
 import QRCodeScanner from '../services/QRCodeScanner';
 import { useLanguage } from '../context/LanguageContext';
@@ -21,15 +22,14 @@ function Loans() {
     const [selectedBookQR, setSelectedBookQR] = useState('');
     const [selectedBook, setSelectedBook] = useState(null);
     const [bookState, setBookState] = useState('');
-    const [borrowingHistory, setBorrowingHistory] = useState([]);
-    const [openLoans, setOpenLoans] = useState([]);
     const [borrowedBooks, setBorrowedBooks] = useState([]);
     const [selectedBorrowedBookQR, setSelectedBorrowedBookQR] = useState("");
     const [selectedBorrowedBook, setSelectedBorrowedBook] = useState(null);
+    const [selectedBorrowerSuggestions, setSelectedBorrowerSuggestions] = useState([]);
     const [loanHistory, setLoanHistory] = useState([]);
     const [showAllLoans, setShowAllLoans] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
-    const [isProcessing, setIsProcessing] = useState(false);
+    const [setIsProcessing] = useState(false);
     // reminder options
     const [showReminderOptions, setShowReminderOptions] = useState(false);
     const [selectedLoansForReminder, setSelectedLoansForReminder] = useState([]);
@@ -93,7 +93,10 @@ function Loans() {
         loadLoanHistory();
     }, [showAllLoans, scanMode, selectedBorrowedBookQR, selectedBookQR]);
 
-
+    const borrowerOptions = members.map((member) => ({
+        value: member.id,
+        label: member.parent_name,
+    }));
 
     // Handle sending reminders
     const handleSendReminders = async () => {
@@ -195,14 +198,6 @@ function Loans() {
         }
     };
 
-    // Handle the selection of borrowed book in return mode
-    const handleBorrowedBookSelect = (e) => {
-        const qrCode = e.target.value;
-        setSelectedBorrowedBookQR(qrCode);
-
-        const book = borrowedBooks.find((b) => b.qr_code === qrCode) || null;
-        setSelectedBorrowedBook(book);
-    };
 
     const handleScan = async () => {
         setIsProcessing(true);
@@ -223,6 +218,8 @@ function Loans() {
                     setSelectedBook(book);
                 } else if (scanMode === 'return') {
                     setSelectedBorrowedBookQR(decodedText);
+                    setSelectedBorrowedBook(book);
+                    setSelectedBook(book);
                     setSelectedBorrowedBook(book);
                 }
 
@@ -296,35 +293,6 @@ function Loans() {
         }
     };
 
-    // Handle book selection for borrowing and returning
-    const handleBookSelect = async (e) => {
-        const qrCode = e.target.value;
-        const book = await fetchBookByQRCode(qrCode);
-
-        if (book) {
-            setSelectedBookQR(qrCode);
-            setSelectedBook(book);
-            setBookState(book.delivery_status);
-
-            // Fetch borrowing history for the selected book and open loans.
-            const history = await fetchBorrowingHistory(qrCode);
-            setBorrowingHistory(history);
-            await loadOpenLoans(qrCode);
-        } else {
-            alert("Book not found.");
-        }
-    };
-
-    // Load open loans based on the selected book QR code
-    const loadOpenLoans = async (qrCode = null) => {
-        try {
-            const loans = await fetchOpenLoans(qrCode);
-            setOpenLoans(loans);
-            console.log("Loaded loans:", loans);
-        } catch (error) {
-            console.error("Failed to fetch open loans", error);
-        }
-    };
 
     // Confirm return of a book
     const confirmReturn = async () => {
@@ -340,8 +308,11 @@ function Loans() {
                 alert("Book returned successfully!");
 
                 // Reset form and refresh lists
-                setSelectedBorrowedBookQR("");
+                // Clear the selected states
                 setSelectedBorrowedBook(null);
+                setSelectedBorrowedBookQR('');
+                setSelectedBook(null);
+                setBookState('');
 
                 const updatedBorrowedBooks = await fetchBorrowedBooks();
                 const updatedLoanHistory = await fetchLoanHistory(null, showAllLoans);
@@ -417,29 +388,45 @@ function Loans() {
                 <div className="space-y-4">
                     <div className="flex gap-4">
                         {/* Borrower Dropdown */}
-                        <select
-                            value={selectedBorrower?.id || ''}
-                            onChange={(e) =>
-                                setSelectedBorrower(members.find((member) => member.id === parseInt(e.target.value)))
-                            }
-                            className="w-full p-2 border rounded"
-                            style={{borderColor: brandColors.coral}}
-                        >
-                            <option value="">{LABELS.select_borrower}</option>
-                            {members.map((member) => (
-                                <option key={member.id} value={member.id}>
-                                    {member.parent_name}
-                                </option>
-                            ))}
-                        </select>
-
+                        <Select
+                            options={borrowerOptions}
+                            placeholder={LABELS.borrowed_by}
+                            value={selectedBorrower ? { value: selectedBorrower.id, label: selectedBorrower.parent_name } : null}
+                            onChange={(selectedOption) => {
+                                if (selectedOption) {
+                                    const selectedMember = members.find((member) => member.id === selectedOption.value);
+                                    setSelectedBorrower(selectedMember);
+                                } else {
+                                    setSelectedBorrower(null); // Clear selection
+                                }
+                            }}
+                            isClearable
+                            styles={{
+                                control: (provided) => ({
+                                    ...provided,
+                                    borderColor: brandColors.coral,
+                                    borderRadius: '4px',
+                                    boxShadow: 'none',
+                                    '&:hover': { borderColor: brandColors.teal },
+                                }),
+                            }}
+                            className="w-full"
+                            classNamePrefix="borrower-select"
+                        />
 
                         {/* Book Title Dropdown */}
                         <select
                             className="w-full p-2 border rounded"
                             style={{borderColor: brandColors.coral}}
-                            onChange={(e) => setSelectedBook(availableBooks.find((book) => book.qr_code === e.target.value))}
-                            value={selectedBook?.qr_code || ""}
+                            onChange={(e) => {
+                                const selectedBook = availableBooks.find((book) => book.qr_code === e.target.value);
+                                setSelectedBook(selectedBook);
+                                setSelectedBookQR(e.target.value);
+                                if (selectedBook) {
+                                    setBookState(selectedBook.delivery_status || '');
+                                }
+                            }}
+                            value={selectedBookQR || ''} // Use selectedBookQR explicitly
                         >
                             <option value="">{LABELS.Select_Book}</option>
                             {availableBooks.map((book) => (
@@ -485,7 +472,7 @@ function Loans() {
                         onClick={handleScan}
                     >
                         <QrCode className="w-4 h-4 mr-2"/>
-                        Scan QR Code
+                        {LABELS.ScanQR}
                     </button>
 
                     {/* Confirm Borrow Button */}
@@ -523,30 +510,28 @@ function Loans() {
                 <div className="mt-6">
                     <div className="mt-4">
                         <select
-                            value={selectedBookQR || ''}
+                            value={selectedBorrowedBookQR || ''}
                             onChange={(e) => {
                                 const qrCode = e.target.value;
-                                setSelectedBookQR(qrCode);
+                                setSelectedBorrowedBookQR(qrCode);
 
-                                const matchingBook = availableBooks.find((book) => book.qr_code === qrCode)
-                                    || borrowedBooks.find((book) => book.qr_code === qrCode);
+                                const matchingBook = borrowedBooks.find((book) => book.qr_code === qrCode);
 
                                 if (matchingBook) {
                                     setSelectedBook(matchingBook);
+                                    setBookState(matchingBook.delivery_status || '');
                                 }
                             }}
                             className="w-full p-2 border rounded"
                             style={{borderColor: brandColors.coral}}
                         >
                             <option value="">{LABELS.Select_Book}</option>
-                            {availableBooks.concat(borrowedBooks).map((book) => (
+                            {borrowedBooks.map((book) => (
                                 <option key={book.qr_code} value={book.qr_code}>
                                     {book.title}
                                 </option>
                             ))}
                         </select>
-
-
                     </div>
                     <div className="mt-4">
                         {/* QR Code Scan Button */}
@@ -636,16 +621,31 @@ function Loans() {
                                     key={loan.id}
                                     onClick={() => {
                                         // Update the selectedBook state
-                                        const matchingBook = availableBooks.find((book) => book.qr_code === loan.book_qr_code)
-                                            || borrowedBooks.find((book) => book.qr_code === loan.book_qr_code);
+                                        if (!loan.returned_at) {
+                                            console.log("Current loan:", loan); // See the full loan object
+                                            console.log("All borrowed books:", borrowedBooks); // See all borrowed books
+                                            const matchingBook = borrowedBooks.find((book) => {
+                                                console.log("Comparing book:", {
+                                                    "loan book_id": loan.book_id,
+                                                    "book id": book.id,
+                                                    "match": book.id === loan.book_id
+                                                });
+                                                return book.id === loan.book_id;
+                                            });
 
-                                        if (matchingBook) {
-                                            setSelectedBook(matchingBook);
-                                            setSelectedBookQR(matchingBook.qr_code);
+                                            console.log("Matching book result:", matchingBook);
+
+                                            if (matchingBook) {
+                                                setSelectedBorrowedBook(matchingBook); // For return-specific logic
+                                                setSelectedBorrowedBookQR(matchingBook.qr_code); // Sync with the dropdown
+                                                setSelectedBook(matchingBook); // General book selection
+                                                setBookState(matchingBook.delivery_status || ''); // Update book state if applicable
+                                            } else {
+                                                alert('Book not found in borrowed books.');
+                                            }
+                                            // Scroll to top
+                                            window.scrollTo({top: 0, behavior: 'smooth'});
                                         }
-
-                                        // Scroll to top
-                                        window.scrollTo({ top: 0, behavior: 'smooth' });
                                     }}
                                     style={{cursor: 'pointer'}} // Make the card look clickable
                                 >
@@ -659,6 +659,8 @@ function Loans() {
                                                 } else {
                                                     setSelectedLoansForReminder(selectedLoansForReminder.filter((l) => l.id !== loan.id));
                                                 }
+                                                // Stop event propagation to prevent card click
+                                                e.stopPropagation();
                                             }}
                                             className="mr-2 ml-2 flex-shrink-0"
                                         />

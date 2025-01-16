@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchBooks, addBookService, fetchMembers } from '../services/services';
+import { fetchBooks, addBookService, fetchMembers, downloadQrCode  } from '../services/services';
 import { useLanguage } from '../context/LanguageContext';
 import { getFieldLabels } from '../utils/labels';
 
@@ -107,6 +107,12 @@ const Inventory = () => {
             ...prev,
             [qrCode]: !prev[qrCode],
         }));
+    };
+
+    const handleDownloadQrCode = (qrCodeFileName) => {
+        downloadQrCode(qrCodeFileName)
+            .then(() => console.log("QR Code downloaded successfully"))
+            .catch((err) => console.error("Failed to download QR Code:", err));
     };
 
     return (
@@ -255,14 +261,12 @@ const Inventory = () => {
                                 )}
                             </p>
                             <p>
-                                <a
-                                    href={`./backend/qr_codes/${book.qr_code}.png`}
-                                    download={`${book.title}_qr_code.png`}
-                                    aria-label={LABELS.download_qr_code} // Screen reader accessibility
+                                <button
+                                    onClick={() => handleDownloadQrCode(`${book.qr_code}.png`)}
                                     className="text-blue-500 text-sm mt-2 hover:underline"
                                 >
-                                    {book.qr_code}
-                                </a>
+                                    {LABELS.download_qr_code}
+                                </button>
                             </p>
                             <button
                                 onClick={() => toggleExpand(book.qr_code)}

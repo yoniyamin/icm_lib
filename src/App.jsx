@@ -19,7 +19,7 @@ function App() {
 }
 
 function AppContent() {
-    const { language, toggleLanguage } = useLanguage();
+    const { language } = useLanguage();
     const LABELS = getFieldLabels(language);
 
     return (

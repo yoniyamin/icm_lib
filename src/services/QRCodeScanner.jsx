@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Html5Qrcode, Html5QrcodeScanner } from "html5-qrcode";
+import { Html5Qrcode } from "html5-qrcode";
 
+// eslint-disable-next-line react/prop-types
 const QRCodeScanner = ({ onScanSuccess, onScanError, onScanCancel }) => {
     const [isProcessingImage, setIsProcessingImage] = useState(false);
 

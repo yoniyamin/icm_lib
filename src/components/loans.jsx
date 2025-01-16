@@ -29,7 +29,7 @@ function Loans() {
     const [loanHistory, setLoanHistory] = useState([]);
     const [showAllLoans, setShowAllLoans] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
-    const [setIsProcessing] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
     // reminder options
     const [showReminderOptions, setShowReminderOptions] = useState(false);
     const [selectedLoansForReminder, setSelectedLoansForReminder] = useState([]);

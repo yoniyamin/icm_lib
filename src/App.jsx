@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
+import Login from "./components/Login";
 import Inventory from './components/Inventory';
 import Members from './components/Members';
 import Loans from './components/Loans';
@@ -10,10 +11,17 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@radix-ui/react-tabs';
 import { BookOpen, Users, QrCode, BarChart } from 'lucide-react';
 import BannerImage from './static/img.png';
 
+
 function App() {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    const handleLogin = () => {
+        setIsAuthenticated(true);
+    };
+
     return (
         <LanguageProvider>
-            <AppContent />
+            {isAuthenticated ? <AppContent /> : <Login onLogin={handleLogin} />}
         </LanguageProvider>
     );
 }

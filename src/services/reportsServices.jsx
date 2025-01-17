@@ -1,8 +1,8 @@
 import axios from 'axios';
+import BASE_URL from "../utils/apiConfig";
+
 const language = navigator.language || 'en-US';
 
-const baseURL = "https://religious-cherianne-dbprops-ef8ee171.koyeb.app";
-// const baseURL = "http://localhost:5000";
 
 export const generateBooksReport = async (orderBy = 'desc', sortField = 'title', includeHistory = true) => {
     try {
@@ -12,7 +12,7 @@ export const generateBooksReport = async (orderBy = 'desc', sortField = 'title',
             include_history: includeHistory.toString()
         });
 
-        const response = await axios.get(`${baseURL}/api/generate_books_report?${params.toString()}`, {
+        const response = await axios.get(`${BASE_URL}/api/generate_books_report?${params.toString()}`, {
             headers: { 'Accept-Language': language },
             responseType: 'blob' // Important to receive binary data
         });
@@ -32,7 +32,7 @@ export const generateInventoryReport = async (orderBy = 'desc', sortField = 'tit
             include_borrowed: includeBorrowed.toString()
         });
 
-        const response = await axios.get(`${baseURL}/api/generate_inventory_report?${params.toString()}`, {
+        const response = await axios.get(`${BASE_URL}/api/generate_inventory_report?${params.toString()}`, {
             headers: { 'Accept-Language': language }, // Include language header
             responseType: 'blob' // Important to receive binary data
         });

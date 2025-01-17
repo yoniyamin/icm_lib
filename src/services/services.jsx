@@ -1,11 +1,10 @@
 import axios from "axios";
-
-const BASE_URL = "https://religious-cherianne-dbprops-ef8ee171.koyeb.app";
-//const BASE_URL = "http://localhost:5000";
+import BASE_URL from "../utils/apiConfig";
+import axiosInstance from "./axiosConfig"; //baseURL is provided by the instance.
 
 export const addMemberService = async (formData) => {
     try {
-        const response = await axios.post(`${BASE_URL}/api/members`, formData);
+        const response = await axiosInstance.post(`/api/members`, formData);
         return response.data;
     } catch (error) {
         throw new Error("Failed to add member.");
@@ -14,7 +13,7 @@ export const addMemberService = async (formData) => {
 
 export const fetchMembers = async () => {
     try {
-        const response = await axios.get(`${BASE_URL}/api/members`);
+        const response = await axiosInstance.get(`/api/members`);
         return response.data;
     } catch (error) {
         console.error("Error fetching members:", error);
@@ -34,7 +33,7 @@ export const fetchBooks = async (orderBy = 'desc') => {
 
 export const addBookService = async (bookData) => {
     try {
-        const response = await axios.post(`${BASE_URL}/api/books`, bookData, {
+        const response = await axiosInstance.post(`/api/books`, bookData, {
             headers: {
                 "Content-Type": "application/json",
             }

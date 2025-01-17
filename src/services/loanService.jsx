@@ -1,35 +1,36 @@
 import axios from "axios";
-const baseURL = "https://religious-cherianne-dbprops-ef8ee171.koyeb.app";
-//const baseURL = "http://localhost:5000";
+import BASE_URL from "../utils/apiConfig";
+import axiosInstance from "./axiosConfig.js";
+
 
 export async function fetchBooks() {
-    const response = await axios.get(`${baseURL}/api/books`);
+    const response = await axios.get(`${BASE_URL}/api/books`);
     return await response.data;
 }
 
 export async function fetchAvailableBooks() {
-    const response = await axios.get(`${baseURL}/api/available_books`);
+    const response = await axios.get(`${BASE_URL}/api/available_books`);
     return await response.data;
 }
 
 export async function fetchBorrowedBooks() {
-    const response = await axios.get(`${baseURL}/api/borrowed_books`);
+    const response = await axios.get(`${BASE_URL}/api/borrowed_books`);
     return await response.data;
 }
 
 export async function fetchBookByQRCode(qrCode) {
-    const response = await axios.get(`${baseURL}/api/book/${qrCode}`);
+    const response = await axios.get(`${BASE_URL}/api/book/${qrCode}`);
     return await response.data;
 }
 
 export async function fetchMembers() {
-    const response = await axios.get(`${baseURL}/api/members`);
+    const response = await axios.get(`${BASE_URL}/api/members`);
     console.log("API Response:", response.data);
     return response.data.members || response.data;
 }
 
 export async function addMember(parent_name, kid_name, email) {
-    const response = await axios.post(`${baseURL}/api/members`, {
+    const response = await axiosInstance.post(`/api/members`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ parent_name, kid_name, email }),
@@ -39,7 +40,7 @@ export async function addMember(parent_name, kid_name, email) {
 
 export const borrowBook = async (qr_code, member_id, book_state) => {
     try {
-        const response = await axios.post(`${baseURL}/api/book/borrow`, {
+        const response = await axiosInstance.post(`/api/book/borrow`, {
             qr_code,
             member_id,
             book_state,
@@ -53,7 +54,7 @@ export const borrowBook = async (qr_code, member_id, book_state) => {
 
 export const returnBook = async (qr_code) => {
     try {
-        const response = await axios.post(`${baseURL}/api/book/return`, { qr_code });
+        const response = await axiosInstance.post(`/api/book/return`, { qr_code });
         return response.data;
     } catch (error) {
         console.error("Error returning book:", error);
@@ -62,7 +63,7 @@ export const returnBook = async (qr_code) => {
 };
 
 export async function updateBookStatus(qrCode, status) {
-    const response = await axios.put(`${baseURL}/api/books/${qrCode}/status`, {
+    const response = await axiosInstance.put(`/api/books/${qrCode}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
@@ -71,14 +72,14 @@ export async function updateBookStatus(qrCode, status) {
 }
 
 export async function fetchBorrowingHistory(qrCode) {
-    const response = await axios.get(`${baseURL}/api/borrowing_history`, {
+    const response = await axios.get(`${BASE_URL}/api/borrowing_history`, {
         params: { qr_code: qrCode },
     });
     return response.data;
 }
 
 export async function fetchLoanHistory(qrCode, showAll) {
-    const response = await axios.get(`${baseURL}/api/loans/history`, {
+    const response = await axios.get(`${BASE_URL}/api/loans/history`, {
         params: {
             qr_code: qrCode || "",
             show_all: showAll ? "true" : "false",
@@ -88,7 +89,7 @@ export async function fetchLoanHistory(qrCode, showAll) {
 }
 
 export async function fetchOpenLoans(qrCode = null) {
-    const response = await axios.get(`${baseURL}/api/open_loans`, {
+    const response = await axios.get(`${BASE_URL}/api/open_loans`, {
         params: { qr_code: qrCode },
     });
     return response.data;
@@ -96,7 +97,7 @@ export async function fetchOpenLoans(qrCode = null) {
 
 export const sendReminder = async (loanId, subject, loanDetails) => {
     try {
-        const response = await axios.post(`${baseURL}/api/send-reminder`, {
+        const response = await axiosInstance.post(`/api/send-reminder`, {
             loan_id: loanId,
             subject,
             loan_details: loanDetails
@@ -116,7 +117,7 @@ export const sendReminder = async (loanId, subject, loanDetails) => {
 
 export const fetchLastReminderForLoan = async (loanId) => {
     try {
-        const response = await axios.get(`${baseURL}/api/reminders/last/${loanId}`);
+        const response = await axios.get(`${BASE_URL}/api/reminders/last/${loanId}`);
         const { sent_at } = response.data;
         return { sent_at };
     } catch (error) {

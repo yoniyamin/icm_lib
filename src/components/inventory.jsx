@@ -253,7 +253,7 @@ const Inventory = () => {
                                 <h2 className="font-bold text-gray-800">{book.title}</h2>
                                 <p className="text-sm text-gray-500">{book.author}</p>
                                 <p className="text-sm">
-                                    {LABELS.loan_status}:{" "}
+                                    {" "}
                                     <span
                                         className={book.loan_status === 'available' ? 'text-green-500' : 'text-red-500'}>
                                     {book.loan_status === 'borrowed' ? LABELS.borrowed : LABELS.available}

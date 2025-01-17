@@ -8,6 +8,7 @@ export const FIELD_LABELS = {
     pages: "Pages",
     borrowing_child: "Borrowing Child's Name",
     borrowed_by: "Borrowed By",
+    borrower: "Borrower",
     borrow: "Borrow Book",
     delivery_status: "Delivery Status",
     delivering_parent: "Delivering Parent",

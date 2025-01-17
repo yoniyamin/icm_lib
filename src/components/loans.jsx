@@ -98,6 +98,11 @@ function Loans() {
         label: member.parent_name,
     }));
 
+    const bookOptions = availableBooks.map((book) => ({
+        value: book.qr_code,
+        label: book.title,
+    }));
+
     // Handle sending reminders
     const handleSendReminders = async () => {
         setIsReminderSending(true);
@@ -415,26 +420,37 @@ function Loans() {
                         />
 
                         {/* Book Title Dropdown */}
-                        <select
-                            className="w-full p-2 border rounded"
-                            style={{borderColor: brandColors.coral}}
-                            onChange={(e) => {
-                                const selectedBook = availableBooks.find((book) => book.qr_code === e.target.value);
-                                setSelectedBook(selectedBook);
-                                setSelectedBookQR(e.target.value);
-                                if (selectedBook) {
-                                    setBookState(selectedBook.delivery_status || '');
+                        <Select
+                            options={bookOptions}
+                            placeholder={LABELS.Select_Book}
+                            value={selectedBook ? { value: selectedBook.qr_code, label: selectedBook.title } : null}
+                            onChange={(selectedOption) => {
+                                if (selectedOption) {
+                                    const selectedBook = availableBooks.find((book) => book.qr_code === selectedOption.value);
+                                    setSelectedBook(selectedBook);
+                                    setSelectedBookQR(selectedOption.value);
+                                    if (selectedBook) {
+                                        setBookState(selectedBook.delivery_status || '');
+                                    }
+                                } else {
+                                    setSelectedBook(null); // Clear selection
+                                    setSelectedBookQR('');
                                 }
                             }}
-                            value={selectedBookQR || ''} // Use selectedBookQR explicitly
-                        >
-                            <option value="">{LABELS.Select_Book}</option>
-                            {availableBooks.map((book) => (
-                                <option key={book.qr_code} value={book.qr_code}>
-                                    {book.title}
-                                </option>
-                            ))}
-                        </select>
+                            isClearable
+                            styles={{
+                                control: (provided) => ({
+                                    ...provided,
+                                    borderColor: brandColors.coral,
+                                    borderRadius: '4px',
+                                    boxShadow: 'none',
+                                    '&:hover': { borderColor: brandColors.teal },
+                                }),
+                            }}
+                            className="w-full"
+                            classNamePrefix="book-select"
+                        />
+
                     </div>
 
                     {/* Book State Dropdown */}

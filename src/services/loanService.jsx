@@ -24,7 +24,7 @@ export async function fetchBookByQRCode(qrCode) {
 }
 
 export async function fetchMembers() {
-    const response = await axios.get(`${BASE_URL}/api/members`);
+    const response = await axiosInstance.get(`/api/members`);
     console.log("API Response:", response.data);
     return response.data.members || response.data;
 }

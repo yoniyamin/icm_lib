@@ -31,10 +31,11 @@ const Login = ({ onLogin }) => {
                 onSubmit={handleSubmit}
                 className="bg-white p-6 rounded shadow-md w-80"
             >
+                <img src={BannerImage} alt="ICM Library Logo"
+                     className="max-h-16 sm:max-h-20 mx-auto mb-4"/>
                 <h1 className="text-xl font-semibold mb-4">Login</h1>
                 {error && <div className="text-red-500 text-sm mb-2">{error}</div>}
                 <div className="mb-4">
-                    <img src={BannerImage} alt="ICM Library Logo" className="max-h-16 sm:max-h-20"/>
                     <label className="block text-gray-700 text-sm mb-2">Username</label>
                     <input
                         type="text"

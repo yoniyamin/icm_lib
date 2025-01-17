@@ -1,4 +1,5 @@
 export const FIELD_LABELS = {
+    by: 'על ידי',
     app_title: 'ספריית הקהילה הישראלית במדריד',
     title: "שם הספר",
     author: "שם המחבר",

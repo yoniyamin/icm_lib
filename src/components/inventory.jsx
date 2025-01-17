@@ -257,7 +257,7 @@ const Inventory = () => {
                                     {book.loan_status === 'borrowed' ? LABELS.borrowed : LABELS.available}
                                 </span>
                                 {book.loan_status === 'borrowed' && (
-                                    <span> {LABELS.borrowing_child}: {book.borrowing_child}</span>
+                                    <span> {LABELS.by} {book.borrowing_child}</span>
                                 )}
                             </p>
                             <p>

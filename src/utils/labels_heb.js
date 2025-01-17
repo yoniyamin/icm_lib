@@ -8,6 +8,7 @@ export const FIELD_LABELS = {
     pages: "עמודים",
     borrowing_child: "שם הילד המשאיל",
     borrowed_by: "הושאל על ידי",
+    borrower: "המשאיל",
     borrow: "השאל ספר",
     delivery_status: "מצב מסירה",
     delivering_parent: "שם ההורה המוסר",

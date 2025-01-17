@@ -395,7 +395,7 @@ function Loans() {
                         {/* Borrower Dropdown */}
                         <Select
                             options={borrowerOptions}
-                            placeholder={LABELS.borrowed_by}
+                            placeholder={LABELS.borrower}
                             value={selectedBorrower ? { value: selectedBorrower.id, label: selectedBorrower.parent_name } : null}
                             onChange={(selectedOption) => {
                                 if (selectedOption) {

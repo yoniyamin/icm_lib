@@ -12,7 +12,7 @@ function Members() {
     const [searchTerm, setSearchTerm] = useState("");
     const [errors, setErrors] = useState({}); // Initialize error state
     const [successMessage, setSuccessMessage] = useState(""); // Initialize success message state
-    const { language, toggleLanguage } = useLanguage();
+    const { language, toggleLanguage, direction } = useLanguage();
     const LABELS = getFieldLabels(language);
 
     const validateForm = () => {
@@ -143,21 +143,22 @@ function Members() {
             />
 
             {/* Member List */}
-            <div className="overflow-y-auto max-h-96 border-t pt-4">
-                {filteredMembers.length > 0 ? (
-                    filteredMembers.map((member) => (
-                        <div key={member.id} className="bg-gray-50 shadow-sm rounded-lg p-4 mb-2">
-                            <h2 className="font-bold text-gray-800">{LABELS.parent_name_label}: {member.parent_name}</h2>
-                            <p className="text-sm text-gray-500">{LABELS.kid_name_label}: {member.kid_name}</p>
-                            <p className="text-sm text-gray-500">{LABELS.email_label}: {member.email}</p>
-                        </div>
-                    ))
-                ) : (
-                    <p className="text-sm text-gray-500">{filteredMembers.length === 0 && LABELS.no_members_found}</p>
-                )}
+            <div dir={direction}>
+                <div className="overflow-y-auto max-h-96 border-t pt-4">
+                    {filteredMembers.length > 0 ? (
+                        filteredMembers.map((member) => (
+                            <div key={member.id} className="bg-gray-50 shadow-sm rounded-lg p-4 mb-2">
+                                <h2 className="font-bold text-gray-800">{LABELS.parent_name_label}: {member.parent_name}</h2>
+                                <p className="text-sm text-gray-500">{LABELS.kid_name_label}: {member.kid_name}</p>
+                                <p className="text-sm text-gray-500">{LABELS.email_label}: {member.email}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-sm text-gray-500">{filteredMembers.length === 0 && LABELS.no_members_found}</p>
+                    )}
+                </div>
             </div>
         </div>
-    );
-}
+        );}
 
-export default Members;
+            export default Members;

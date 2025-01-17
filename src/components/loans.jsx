@@ -34,7 +34,7 @@ function Loans() {
     const [showReminderOptions, setShowReminderOptions] = useState(false);
     const [selectedLoansForReminder, setSelectedLoansForReminder] = useState([]);
     const [isReminderSending, setIsReminderSending] = useState(false);
-    const { language, toggleLanguage } = useLanguage();
+    const { language, toggleLanguage, direction } = useLanguage();
     const LABELS = getFieldLabels(language);
 
 

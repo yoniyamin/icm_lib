@@ -20,7 +20,7 @@ const Inventory = () => {
     const [showAddBook, setShowAddBook] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [expandedBooks, setExpandedBooks] = useState({});
-    const { language, toggleLanguage } = useLanguage();
+    const { language, toggleLanguage, direction } = useLanguage();
     const LABELS = getFieldLabels(language);
 
     const COVER_TYPE_OPTIONS = [
@@ -241,58 +241,64 @@ const Inventory = () => {
             )}
 
             {/* Book List */}
-            <div className="overflow-y-auto max-h-screen border-t pt-4">
-                {books
-                    .filter(book =>
-                        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        book.author.toLowerCase().includes(searchTerm.toLowerCase())
-                    )
-                    .map((book) => (
-                        <div key={book.qr_code} className="bg-gray-50 shadow-sm rounded-lg p-4 mb-2">
-                            <h2 className="font-bold text-gray-800">{book.title}</h2>
-                            <p className="text-sm text-gray-500">{book.author}</p>
-                            <p className="text-sm">
-                                {LABELS.loan_status}:{" "}
-                                <span className={book.loan_status === 'available' ? 'text-green-500' : 'text-red-500'}>
+            <div dir={direction}>
+                <div className="overflow-y-auto max-h-screen border-t pt-4">
+                    {books
+                        .filter(book =>
+                            book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            book.author.toLowerCase().includes(searchTerm.toLowerCase())
+                        )
+                        .map((book) => (
+                            <div key={book.qr_code} className="bg-gray-50 shadow-sm rounded-lg p-4 mb-2">
+                                <h2 className="font-bold text-gray-800">{book.title}</h2>
+                                <p className="text-sm text-gray-500">{book.author}</p>
+                                <p className="text-sm">
+                                    {LABELS.loan_status}:{" "}
+                                    <span
+                                        className={book.loan_status === 'available' ? 'text-green-500' : 'text-red-500'}>
                                     {book.loan_status === 'borrowed' ? LABELS.borrowed : LABELS.available}
                                 </span>
-                                {book.loan_status === 'borrowed' && (
-                                    <span> {LABELS.by} {book.borrowing_child}</span>
-                                )}
-                            </p>
-                            <p>
+                                    {book.loan_status === 'borrowed' && (
+                                        <span> {LABELS.by} {book.borrowing_child}</span>
+                                    )}
+                                </p>
+                                <p>
+                                    <button
+                                        onClick={() => handleDownloadQrCode(`${book.qr_code}.png`)}
+                                        className="text-blue-500 text-sm mt-2 hover:underline"
+                                    >
+                                        {LABELS.download_qr_code}
+                                    </button>
+                                </p>
                                 <button
-                                    onClick={() => handleDownloadQrCode(`${book.qr_code}.png`)}
+                                    onClick={() => toggleExpand(book.qr_code)}
                                     className="text-blue-500 text-sm mt-2 hover:underline"
                                 >
-                                    {LABELS.download_qr_code}
+                                    {expandedBooks[book.qr_code] ? LABELS.Hide_Details : LABELS.More_Details}
                                 </button>
-                            </p>
-                            <button
-                                onClick={() => toggleExpand(book.qr_code)}
-                                className="text-blue-500 text-sm mt-2 hover:underline"
-                            >
-                                {expandedBooks[book.qr_code] ? LABELS.Hide_Details : LABELS.More_Details}
-                            </button>
-                            {expandedBooks[book.qr_code] && (
-                                <div className="mt-2 text-gray-600">
-                                    <p><strong>{LABELS.description}:</strong> {book.description || 'N/A'}</p>
-                                    <p>
-                                        <strong>{LABELS.year_of_publication}:</strong> {book.year_of_publication || 'N/A'}
-                                    </p>
-                                    <p><strong>{LABELS.cover_type}:</strong> {book.cover_type || 'N/A'}</p>
-                                    <p><strong>{LABELS.pages}:</strong> {book.pages || 'N/A'}</p>
-                                    <p><strong>{LABELS.recommended_age}:</strong> {book.recommended_age || 'N/A'}</p>
-                                    <p><strong>{LABELS.select_condition}:</strong> {book.book_condition || 'N/A'}</p>
-                                    <p><strong>{LABELS.delivering_parent}:</strong> {book.delivering_parent || 'N/A'}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    ))}
+                                {expandedBooks[book.qr_code] && (
+                                    <div className="mt-2 text-gray-600">
+                                        <p><strong>{LABELS.description}:</strong> {book.description || 'N/A'}</p>
+                                        <p>
+                                            <strong>{LABELS.year_of_publication}:</strong> {book.year_of_publication || 'N/A'}
+                                        </p>
+                                        <p><strong>{LABELS.cover_type}:</strong> {book.cover_type || 'N/A'}</p>
+                                        <p><strong>{LABELS.pages}:</strong> {book.pages || 'N/A'}</p>
+                                        <p><strong>{LABELS.recommended_age}:</strong> {book.recommended_age || 'N/A'}
+                                        </p>
+                                        <p><strong>{LABELS.select_condition}:</strong> {book.book_condition || 'N/A'}
+                                        </p>
+                                        <p>
+                                            <strong>{LABELS.delivering_parent}:</strong> {book.delivering_parent || 'N/A'}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                </div>
+               </div>
             </div>
-        </div>
-    );
-};
+            );
+            };
 
-export default Inventory;
+            export default Inventory;

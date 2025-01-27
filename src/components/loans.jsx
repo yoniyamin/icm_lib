@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { QrCode, Mail } from 'lucide-react';
@@ -93,6 +94,16 @@ function Loans() {
         loadLoanHistory();
     }, [showAllLoans, scanMode, selectedBorrowedBookQR, selectedBookQR]);
 
+    useEffect(() => {
+        // Clear all selection states when switching modes
+        setSelectedBook(null);
+        setSelectedBookQR('');
+        setSelectedBorrowedBook(null);
+        setSelectedBorrowedBookQR('');
+        setBookState('');
+        setSelectedBorrower(null);
+    }, [scanMode]);
+
     const borrowerOptions = members.map((member) => ({
         value: member.id,
         label: member.parent_name,
@@ -102,6 +113,31 @@ function Loans() {
         value: book.qr_code,
         label: book.title,
     }));
+
+    const handleLoanCardClick = (loan) => {
+        if (!loan.returned_at) {
+            const matchingBook = borrowedBooks.find((book) => book.id === loan.book_id);
+
+            if (matchingBook) {
+                setSelectedBorrowedBook(matchingBook);
+                setSelectedBorrowedBookQR(matchingBook.qr_code);
+                setSelectedBook(matchingBook);
+                setBookState(matchingBook.delivery_status || '');
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            } else {
+                alert('Book not found in borrowed books.');
+            }
+        }
+    };
+
+    const handleReminderCheckboxChange = (e, loan) => {
+        e.stopPropagation(); // Stop event from bubbling up
+        if (e.target.checked) {
+            setSelectedLoansForReminder([...selectedLoansForReminder, loan]);
+        } else {
+            setSelectedLoansForReminder(selectedLoansForReminder.filter((l) => l.id !== loan.id));
+        }
+    };
 
     // Handle sending reminders
     const handleSendReminders = async () => {
@@ -319,9 +355,11 @@ function Loans() {
                 setSelectedBook(null);
                 setBookState('');
 
+                const updatedAvailableBooks = await fetchAvailableBooks();
                 const updatedBorrowedBooks = await fetchBorrowedBooks();
                 const updatedLoanHistory = await fetchLoanHistory(null, showAllLoans);
 
+                setAvailableBooks(updatedAvailableBooks);
                 setBorrowedBooks(updatedBorrowedBooks);
                 setLoanHistory(sortLoans(updatedLoanHistory));
             } else {
@@ -391,67 +429,66 @@ function Loans() {
 
             {scanMode === 'borrow' && (
                 <div className="space-y-4">
-                    <div className="flex gap-4">
-                        {/* Borrower Dropdown */}
-                        <Select
-                            options={borrowerOptions}
-                            placeholder={LABELS.borrower}
-                            value={selectedBorrower ? { value: selectedBorrower.id, label: selectedBorrower.parent_name } : null}
-                            onChange={(selectedOption) => {
-                                if (selectedOption) {
-                                    const selectedMember = members.find((member) => member.id === selectedOption.value);
-                                    setSelectedBorrower(selectedMember);
-                                } else {
-                                    setSelectedBorrower(null); // Clear selection
-                                }
-                            }}
-                            isClearable
-                            styles={{
-                                control: (provided) => ({
-                                    ...provided,
-                                    borderColor: brandColors.coral,
-                                    borderRadius: '4px',
-                                    boxShadow: 'none',
-                                    '&:hover': { borderColor: brandColors.teal },
-                                }),
-                            }}
-                            className="w-full"
-                            classNamePrefix="borrower-select"
-                        />
+                    {/* Borrower Dropdown */}
+                    <Select
+                        options={borrowerOptions}
+                        placeholder={LABELS.borrower}
+                        value={selectedBorrower ? { value: selectedBorrower.id, label: selectedBorrower.parent_name } : null}
+                        onChange={(selectedOption) => {
+                            const selectedMember = members.find((member) => member.id === selectedOption?.value);
+                            setSelectedBorrower(selectedMember || null);
+                        }}
+                        isClearable
+                        styles={{
+                            control: (provided) => ({
+                                ...provided,
+                                borderColor: brandColors.coral,
+                                borderRadius: '4px',
+                                boxShadow: 'none',
+                                '&:hover': { borderColor: brandColors.teal },
+                            }),
+                        }}
+                        className="w-full"
+                        classNamePrefix="borrower-select"
+                    />
 
-                        {/* Book Title Dropdown */}
-                        <Select
-                            options={bookOptions}
-                            placeholder={LABELS.Select_Book}
-                            value={selectedBook ? { value: selectedBook.qr_code, label: selectedBook.title } : null}
-                            onChange={(selectedOption) => {
-                                if (selectedOption) {
-                                    const selectedBook = availableBooks.find((book) => book.qr_code === selectedOption.value);
-                                    setSelectedBook(selectedBook);
-                                    setSelectedBookQR(selectedOption.value);
-                                    if (selectedBook) {
-                                        setBookState(selectedBook.delivery_status || '');
-                                    }
-                                } else {
-                                    setSelectedBook(null); // Clear selection
-                                    setSelectedBookQR('');
-                                }
-                            }}
-                            isClearable
-                            styles={{
-                                control: (provided) => ({
-                                    ...provided,
-                                    borderColor: brandColors.coral,
-                                    borderRadius: '4px',
-                                    boxShadow: 'none',
-                                    '&:hover': { borderColor: brandColors.teal },
-                                }),
-                            }}
-                            className="w-full"
-                            classNamePrefix="book-select"
-                        />
+                    {/* Display Book title */}
+                    <Select
+                        options={bookOptions}
+                        placeholder={LABELS.Select_Book}
+                        value={selectedBook ? { value: selectedBook.qr_code, label: selectedBook.title } : null}
+                        onChange={(selectedOption) => {
+                            const selectedBook = availableBooks.find((book) => book.qr_code === selectedOption?.value);
+                            setSelectedBook(selectedBook || null);
+                            setSelectedBookQR(selectedOption?.value || '');
+                            setBookState(selectedBook?.delivery_status || '');
+                        }}
+                        isClearable
+                        styles={{
+                            control: (provided) => ({
+                                ...provided,
+                                borderColor: brandColors.coral,
+                                borderRadius: '4px',
+                                boxShadow: 'none',
+                                '&:hover': { borderColor: brandColors.teal },
+                            }),
+                        }}
+                        className="w-full"
+                        classNamePrefix="book-select"
+                    />
 
-                    </div>
+                    {/* Display Book Information */}
+                    {selectedBook && (
+                        <div className="bg-gray-100 p-4 rounded mt-4">
+                            <h3 className="font-bold text-lg">{selectedBook.title}</h3>
+                            <p className="text-sm">{LABELS.author}: {selectedBook.author}</p>
+                            <p className="text-sm">{LABELS.year_of_publication}: {selectedBook.year_of_publication}</p>
+                            <p className="text-sm">{LABELS.cover_type}: {selectedBook.cover_type}</p>
+                            <p className="text-sm">{LABELS.pages}: {selectedBook.pages}</p>
+                            <p className="text-sm">{LABELS.recommended_age}: {selectedBook.recommended_age}</p>
+                            <p className="text-sm">{LABELS.Select_Book_State}: {selectedBook.book_condition}</p>
+                        </div>
+                    )}
 
                     {/* Book State Dropdown */}
                     {selectedBook && (
@@ -468,18 +505,7 @@ function Loans() {
                         </select>
                     )}
 
-                    {/* Display Book Information */}
-                    {selectedBook && (
-                        <div className="bg-gray-100 p-4 rounded mt-4">
-                            <h3 className="font-bold text-lg">{selectedBook.title}</h3>
-                            <p className="text-sm">{LABELS.author}: {selectedBook.author}</p>
-                            <p className="text-sm">{LABELS.year_of_publication}: {selectedBook.year_of_publication}</p>
-                            <p className="text-sm">{LABELS.cover_type}: {selectedBook.cover_type}</p>
-                            <p className="text-sm">{LABELS.pages}: {selectedBook.pages}</p>
-                            <p className="text-sm">{LABELS.recommended_age}: {selectedBook.recommended_age}</p>
-                            <p className="text-sm">{LABELS.Select_Book_State}: {selectedBook.book_condition}</p>
-                        </div>
-                    )}
+
 
                     {/* QR Code Scan Button */}
                     <button
@@ -500,23 +526,32 @@ function Loans() {
                         {LABELS.borrow}
                     </button>
 
-                    {/* Borrow History Section */}
-                    <div className={`loan-history-container ${language === 'he' ? 'rtl' : ''}`}>
-                        {loanHistory.map((loan) => (
+                    {/* Available Books as Cards */}
+                    <div className="loan-history-container">
+                        {availableBooks.map((book) => (
                             <div
-                                className={`loan-history-card ${!loan.returned_at ? 'active-loan flex items-center' : ''} ${language === 'he' ? 'rtl' : ''}`}
-                                key={loan.id}
+                                key={book.qr_code}
+                                className={`loan-history-card ${selectedBook?.qr_code === book.qr_code ? 'active-loan' : ''}`}
+                                onClick={() => {
+                                    setSelectedBook(book);
+                                    setSelectedBookQR(book.qr_code);
+                                    setBookState(book.delivery_status || '');
+                                }}
+                                style={{ cursor: 'pointer' }}
                             >
-                                <div className="loan-history-card-title">{loan.book_title}</div>
-                                <div
-                                    className="loan-history-card-detail">{LABELS.borrowed_by}: {loan.borrower_name}</div>
-                                <div className="loan-history-card-detail">{LABELS.borrow_date}: {loan.borrowed_at}</div>
-                                <div
-                                    className="loan-history-card-detail">{LABELS.return_date}: {loan.returned_at || "Not Returned"}</div>
-                                <div
-                                    className="loan-history-card-detail">{LABELS.delivery_status}: {loan.book_state || "N/A"}</div>
-                            </div>
+                                {/* Header Section */}
+                                <div className="loan-history-card-header">
+                                    <h3 className="loan-history-card-title">{book.title}</h3>
+                                </div>
 
+                                {/* Body Section */}
+                                <div className="loan-history-card-body">
+                                    <p className="loan-history-card-detail">{LABELS.author}: {book.author}</p>
+                                    <p className="loan-history-card-detail">{LABELS.year_of_publication}: {book.year_of_publication}</p>
+                                    <p className="loan-history-card-detail">{LABELS.pages}: {book.pages}</p>
+                                    <p className="loan-history-card-detail">{LABELS.recommended_age}: {book.recommended_age}</p>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -579,15 +614,15 @@ function Loans() {
                         </button>
                     </div>
                     <div className="flex items-center my-4">
-                        <label className="ml-4 flex items-center">
+                        <label className="ml-4 flex items-center cursor-pointer">
                             <input
                                 id="checkbox_showall"
                                 type="checkbox"
                                 checked={showAllLoans}
                                 onChange={handleShowAllChange}
-                                className="mr-2"
+                                className="w-4 h-4 text-teal-500 border-gray-300 rounded focus:ring-teal-500 cursor-pointer"
                             />
-                            {LABELS.ShowAllLoans}
+                            <span className="ml-2">{LABELS.ShowAllLoans}</span>
                         </label>
                     </div>
 
@@ -596,24 +631,22 @@ function Loans() {
                     {showReminderOptions && loanHistory.filter(loan => !loan.returned_at).length > 0 && (
                         <div className="reminder-section bg-gray-100 p-4 rounded-lg mb-4">
                             <div className="flex items-center justify-between mb-2">
-                                <h3 className="text-lg font-semibold">Send Reminders</h3>
-                                <label className="flex items-center">
+                                <h3 className="text-lg font-semibold">{LABELS.SendReminders}</h3>
+                                <label className="flex items-center cursor-pointer">
                                     <input
                                         type="checkbox"
                                         checked={selectedLoansForReminder.length === loanHistory.filter(loan => !loan.returned_at).length}
                                         onChange={(e) => {
                                             if (e.target.checked) {
-                                                // Select all non-returned loans
                                                 const nonReturnedLoans = loanHistory.filter(loan => !loan.returned_at);
                                                 setSelectedLoansForReminder(nonReturnedLoans);
                                             } else {
-                                                // Deselect all
                                                 setSelectedLoansForReminder([]);
                                             }
                                         }}
-                                        className="mr-2"
+                                        className="w-4 h-4 text-teal-500 border-gray-300 rounded focus:ring-teal-500 cursor-pointer"
                                     />
-                                    Select All
+                                    <span className="ml-2">{LABELS.select_all}</span>
                                 </label>
                             </div>
 
@@ -624,7 +657,9 @@ function Loans() {
                                 onClick={handleSendReminders}
                                 disabled={selectedLoansForReminder.length === 0 || isReminderSending}
                             >
-                                {isReminderSending ? 'Sending...' : `Send ${selectedLoansForReminder.length} Reminders`}
+                                {isReminderSending
+                                    ? LABELS.sending_reminders
+                                    : LABELS.send_x_reminders.replace("{count}", selectedLoansForReminder.length)}
                             </button>
                         </div>
                     )}
@@ -635,62 +670,41 @@ function Loans() {
                                 <div
                                     className={`loan-history-card ${!loan.returned_at ? 'active-loan' : ''} ${language === 'he' ? 'rtl' : ''}`}
                                     key={loan.id}
-                                    onClick={() => {
-                                        // Update the selectedBook state
-                                        if (!loan.returned_at) {
-                                            console.log("Current loan:", loan); // See the full loan object
-                                            console.log("All borrowed books:", borrowedBooks); // See all borrowed books
-                                            const matchingBook = borrowedBooks.find((book) => {
-                                                console.log("Comparing book:", {
-                                                    "loan book_id": loan.book_id,
-                                                    "book id": book.id,
-                                                    "match": book.id === loan.book_id
-                                                });
-                                                return book.id === loan.book_id;
-                                            });
-
-                                            console.log("Matching book result:", matchingBook);
-
-                                            if (matchingBook) {
-                                                setSelectedBorrowedBook(matchingBook); // For return-specific logic
-                                                setSelectedBorrowedBookQR(matchingBook.qr_code); // Sync with the dropdown
-                                                setSelectedBook(matchingBook); // General book selection
-                                                setBookState(matchingBook.delivery_status || ''); // Update book state if applicable
-                                            } else {
-                                                alert('Book not found in borrowed books.');
-                                            }
-                                            // Scroll to top
-                                            window.scrollTo({top: 0, behavior: 'smooth'});
-                                        }
-                                    }}
-                                    style={{cursor: 'pointer'}} // Make the card look clickable
+                                    onClick={() => scanMode === 'return' && handleLoanCardClick(loan)}
                                 >
-                                    {showReminderOptions && !loan.returned_at && (
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedLoansForReminder.some((l) => l.id === loan.id)}
-                                            onChange={(e) => {
-                                                if (e.target.checked) {
-                                                    setSelectedLoansForReminder([...selectedLoansForReminder, loan]);
-                                                } else {
-                                                    setSelectedLoansForReminder(selectedLoansForReminder.filter((l) => l.id !== loan.id));
-                                                }
-                                                // Stop event propagation to prevent card click
-                                                e.stopPropagation();
-                                            }}
-                                            className="mr-2 ml-2 flex-shrink-0"
-                                        />
-                                    )}
-                                    <div className="flex-grow">
-                                        <div className="loan-history-card-title">{loan.book_title}</div>
-                                        <div
-                                            className="loan-history-card-detail">{LABELS.borrowed_by}: {loan.borrower_name}</div>
-                                        <div
-                                            className="loan-history-card-detail">{LABELS.borrow_date}: {loan.borrowed_at}</div>
-                                        <div
-                                            className="loan-history-card-detail">{LABELS.return_date}: {loan.returned_at || 'Not Returned'}</div>
-                                        <div
-                                            className="loan-history-card-detail">{LABELS.delivery_status}: {loan.book_state || 'N/A'}</div>
+                                    {/* Header Section */}
+                                    <div className="loan-history-card-header">
+                                        {showReminderOptions && !loan.returned_at && (
+                                            <div onClick={e => e.stopPropagation()}>
+                                                <label className="custom-checkbox">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedLoansForReminder.some((l) => l.id === loan.id)}
+                                                        onChange={(e) => handleReminderCheckboxChange(e, loan)}
+                                                        className="hidden-checkbox"
+                                                    />
+                                                    <span className="checkbox-mark"></span>
+                                                </label>
+                                            </div>
+                                        )}
+                                        <div className="loan-history-card-title">
+                                            {loan.book_title}
+                                        </div>
+                                    </div>
+
+                                    <div className="loan-history-card-body">
+                                        <div className="loan-history-card-detail">
+                                            {LABELS.borrowed_by}: {loan.borrower_name}
+                                        </div>
+                                        <div className="loan-history-card-detail">
+                                            {LABELS.borrow_date}: {loan.borrowed_at}
+                                        </div>
+                                        <div className="loan-history-card-detail">
+                                            {LABELS.return_date}: {loan.returned_at || 'Not Returned'}
+                                        </div>
+                                        <div className="loan-history-card-detail">
+                                            {LABELS.delivery_status}: {loan.book_state || 'N/A'}
+                                        </div>
                                         <div className="loan-history-card-detail">
                                             {LABELS.last_reminder}: {loan.last_reminder_date || 'No Reminders Sent'}
                                         </div>

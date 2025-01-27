@@ -37,6 +37,8 @@ export const FIELD_LABELS = {
     download_qr_code: "Download QR Code",
     SendReminders: "Send Reminders",
     last_reminder: "last reminder at",
+    sending_reminders: "Sending...",
+    send_x_reminders: "Send {count} Reminders",
     error_generating_report: "Failed to generate report. Please try again.",
     reports: "Reports",
     generate_report_button: "Generate report",
@@ -49,6 +51,7 @@ export const FIELD_LABELS = {
     search_placeholder: 'Search members by name',
     members_list_title: 'Library Members',
     no_members_found: 'No members found',
+    select_all: 'Select All',
 
     // Form Placeholders and Labels
     parent_name_placeholder: 'Parent\'s Name',

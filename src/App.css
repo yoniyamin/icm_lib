@@ -207,3 +207,71 @@ select {
   margin-left: auto; /* Reverse margin for proper spacing */
   margin-right: 0;
 }
+
+/* Header Section */
+.loan-history-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #4ECAC7; /* Light teal background */
+  border-bottom: 3px solid #E6F7F7; /* Teal border */
+  padding: 0.5rem;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+/* Body Section */
+.loan-history-card-body {
+  background-color: #E6F7F7; /* Light gray background */
+  padding: 1rem;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  border: 2px solid #E5E7EB; /* Gray border */
+  border-top: none; /* Remove border overlap with the header */
+}
+
+/* Checkbox Styling */
+.custom-checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e06767;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  position: relative;
+  margin-right: 8px;
+  transition: all 0.3s ease;
+}
+
+.custom-checkbox:hover {
+  border-color: #F38181;
+}
+
+.hidden-checkbox {
+  display: none;
+}
+
+.checkbox-mark {
+  display: block;
+  width: 16px;
+  height: 16px;
+  background-color: transparent;
+  border-radius: 2px;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transform: scale(0);
+  transition: all 0.3s ease;
+}
+
+.hidden-checkbox:checked + .checkbox-mark {
+  background-color: #4ECAC7;
+  transform: scale(1);
+}
+
+.hidden-checkbox:focus + .checkbox-mark {
+  outline: 2px solid #FEC43C;
+}

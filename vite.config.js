@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
-      output:{
+      output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
             return id.toString().split('node_modules/')[1].split('/')[0].toString();
@@ -14,7 +14,6 @@ export default defineConfig({
       }
     }
   },
-  chunkSizeWarningLimit: 1000, // Adjust size limit if needed
   base: "/icm_lib/",
   server: {
     port: 3000,

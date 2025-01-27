@@ -37,6 +37,8 @@ export const FIELD_LABELS = {
     download_qr_code: "הורד ברקוד",
     SendReminders: "שלח תזכורת",
     last_reminder: "תזכורת אחרונה ב",
+    sending_reminders: "שולח...",
+    send_x_reminders: "שלח {count} תזכורות",
     error_generating_report: "הפקת הדוח נכשלה, נסה שנית בבקשה.",
     reports: "דוחות",
     generate_report_button: "הפק דוח",
@@ -49,6 +51,7 @@ export const FIELD_LABELS = {
     search_placeholder: 'חפש חברים לפי שם',
     members_list_title: 'חברי הספרייה',
     no_members_found: 'לא נמצאו חברים',
+    select_all: 'בחר הכל',
 
     // Form Placeholders and Labels
     parent_name_placeholder: 'שם ההורה',

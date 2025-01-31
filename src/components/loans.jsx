@@ -479,9 +479,12 @@ function Loans() {
 
                     {/* Display Book Information */}
                     {selectedBook && (
-                        <div className="bg-gray-100 p-4 rounded mt-4">
+                        <div
+                            className={`bg-gray-100 p-4 rounded mt-4 ${language === 'he' ? 'rtl' : ''}`}
+                        >
                             <h3 className="font-bold text-lg">{selectedBook.title}</h3>
                             <p className="text-sm">{LABELS.author}: {selectedBook.author}</p>
+                            <p className="text-sm">{LABELS.description}: {selectedBook.description}</p>
                             <p className="text-sm">{LABELS.year_of_publication}: {selectedBook.year_of_publication}</p>
                             <p className="text-sm">{LABELS.cover_type}: {selectedBook.cover_type}</p>
                             <p className="text-sm">{LABELS.pages}: {selectedBook.pages}</p>
@@ -499,9 +502,9 @@ function Loans() {
                             value={bookState}
                         >
                             <option value="">{LABELS.Select_Book_State}</option>
-                            <option value="כמו חדש">כמו חדש</option>
-                            <option value="מצויין - בלאי בלתי מורגש">מצויין - בלאי בלתי מורגש</option>
-                            <option value="טוב - בלאי קל">טוב - בלאי קל</option>
+                            <option value="כמו חדש">{LABELS.new}</option>
+                            <option value="מצויין - בלאי בלתי מורגש">{LABELS.good}</option>
+                            <option value="טוב - בלאי קל">{LABELS.worn}</option>
                         </select>
                     )}
 
@@ -527,17 +530,17 @@ function Loans() {
                     </button>
 
                     {/* Available Books as Cards */}
-                    <div className="loan-history-container">
+                    <div className={`loan-history-container ${language === 'he' ? 'rtl' : ''}`}>
                         {availableBooks.map((book) => (
                             <div
                                 key={book.qr_code}
-                                className={`loan-history-card ${selectedBook?.qr_code === book.qr_code ? 'active-loan' : ''}`}
+                                className={`loan-history-card ${selectedBook?.qr_code === book.qr_code ? 'active-loan' : ''} ${language === 'he' ? 'rtl' : ''}`}
                                 onClick={() => {
                                     setSelectedBook(book);
                                     setSelectedBookQR(book.qr_code);
                                     setBookState(book.delivery_status || '');
                                 }}
-                                style={{ cursor: 'pointer' }}
+                                style={{cursor: 'pointer'}}
                             >
                                 {/* Header Section */}
                                 <div className="loan-history-card-header">

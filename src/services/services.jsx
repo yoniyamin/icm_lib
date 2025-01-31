@@ -6,6 +6,7 @@ export const addMemberService = async (formData) => {
     try {
         const response = await axiosInstance.post(`/api/members`, formData);
         return response.data;
+        // eslint-disable-next-line no-unused-vars
     } catch (error) {
         throw new Error("Failed to add member.");
     }
@@ -17,6 +18,26 @@ export const fetchMembers = async () => {
         return response.data;
     } catch (error) {
         console.error("Error fetching members:", error);
+        throw error;
+    }
+};
+
+export const updateMemberService = async (id, memberData) => {
+    try {
+        const response = await axiosInstance.put(`/api/members/${id}`, memberData);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating member:', error);
+        throw error;
+    }
+};
+
+export const deleteMemberService = async (id) => {
+    try {
+        const response = await axiosInstance.delete(`/api/members/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting member:', error);
         throw error;
     }
 };
@@ -59,6 +80,16 @@ export const downloadQrCode = async (qrCodeFileName) => {
         link.remove();
     } catch (error) {
         console.error("Error downloading QR code:", error);
+        throw error;
+    }
+};
+
+export const updateBookService = async (id, bookData) => {
+    try {
+        const response = await axiosInstance.put(`${BASE_URL}/api/books/${id}`,bookData);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating book:', error);
         throw error;
     }
 };

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { fetchBooks, addBookService, fetchMembers, downloadQrCode  } from '../services/services';
+import { ChevronDown, ChevronUp, Edit } from 'lucide-react';
+import { fetchBooks, addBookService, fetchMembers, downloadQrCode , updateBookService  } from '../services/services';
 import { useLanguage } from '../context/LanguageContext';
-import { getFieldLabels } from '../utils/labels';
+import {getFieldLabels, translateBookCondition, translateCoverType} from '../utils/labels';
 
 const Inventory = () => {
     const [books, setBooks] = useState([]);
@@ -22,6 +23,9 @@ const Inventory = () => {
     const [expandedBooks, setExpandedBooks] = useState({});
     const { language, toggleLanguage, direction } = useLanguage();
     const LABELS = getFieldLabels(language);
+    const [editingBookId, setEditingBookId] = useState(null);
+    const [currentQrCode, setCurrentQrCode] = useState('');
+
 
     const COVER_TYPE_OPTIONS = [
         { value: 'כריכה רכה', label: LABELS.soft_cover },
@@ -31,9 +35,9 @@ const Inventory = () => {
     ];
 
     const BOOK_CONDITION_OPTIONS = [
-        { value: 'new', label: LABELS.new },
-        { value: 'good', label: LABELS.good },
-        { value: 'worn', label: LABELS.worn }
+        { value: 'כמו חדש', label: LABELS.new },
+        { value: 'מצויין - בלאי בלתי מורגש', label: LABELS.good },
+        { value: 'טוב - בלאי קל', label: LABELS.worn },
     ];
 
     const LOAN_STATUS_OPTIONS = [
@@ -73,7 +77,7 @@ const Inventory = () => {
     const handleAddBook = async (e) => {
         e.preventDefault();
         try {
-            await addBookService({
+            const bookData = {
                 title,
                 author,
                 description,
@@ -84,9 +88,17 @@ const Inventory = () => {
                 recommended_age: recommendedAge,
                 loan_status: loanStatus,
                 delivering_parent: deliveringParent
-            });
+            };
+
+            if (editingBookId) {
+                await updateBookService(editingBookId, bookData);
+            } else {
+                await addBookService(bookData);
+            }
 
             // Reset form fields
+            setEditingBookId(null);
+            setCurrentQrCode('');
             setTitle('');
             setAuthor('');
             setDescription('');
@@ -98,8 +110,23 @@ const Inventory = () => {
             setShowAddBook(false);
             await loadBooks();
         } catch (error) {
-            console.error("Error adding book:", error);
+            console.error("Error saving book:", error);
         }
+    };
+
+    const handleEditBook = (book) => {
+        setShowAddBook(true);
+        setEditingBookId(book.id);
+        setCurrentQrCode(book.qr_code);
+        setTitle(book.title);
+        setAuthor(book.author || '');
+        setDescription(book.description || '');
+        setYear(book.year_of_publication || '');
+        setPages(book.pages || '');
+        setCoverType(book.cover_type || '');
+        setBookCondition(book.book_condition || '');
+        setRecommendedAge(book.recommended_age || '');
+        setDeliveringParent(book.delivering_parent || '');
     };
 
     const toggleExpand = (qrCode) => {
@@ -235,8 +262,9 @@ const Inventory = () => {
                     </select>
                     <button type="submit"
                             className="w-full bg-green-500 text-white font-semibold py-2 rounded-md hover:bg-green-600 transition">
-                        {LABELS.add_book_button}
+                        {editingBookId ? LABELS.update_book_button : LABELS.add_book_button}
                     </button>
+
                 </form>
             )}
 
@@ -249,44 +277,74 @@ const Inventory = () => {
                             book.author.toLowerCase().includes(searchTerm.toLowerCase())
                         )
                         .map((book) => (
-                            <div key={book.qr_code} className="bg-gray-50 shadow-sm rounded-lg p-4 mb-2">
-                                <h2 className="font-bold text-gray-800">{book.title}</h2>
-                                <p className="text-sm text-gray-500">{book.author}</p>
-                                <p className="text-sm">
-                                    {" "}
-                                    <span
-                                        className={book.loan_status === 'available' ? 'text-green-500' : 'text-red-500'}>
-                                    {book.loan_status === 'borrowed' ? LABELS.borrowed : LABELS.available}
-                                </span>
-                                    {book.loan_status === 'borrowed' && (
-                                        <span> {LABELS.by} {book.borrowing_child}</span>
-                                    )}
-                                </p>
-                                <p>
+                            <div key={book.qr_code} className="bg-gray-50 shadow-sm rounded-lg p-4 mb-2 relative">
+                                {/* Main content */}
+                                <div className="mb-12">
+                                    <h2 className="font-bold text-gray-800">{book.title}</h2>
+                                    <p className="text-sm text-gray-500">{book.author}</p>
+                                    <p className="text-sm mb-4">
+                                        <span
+                                            className={book.loan_status === 'available' ? 'text-green-500' : 'text-red-500'}>
+                                            {book.loan_status === 'borrowed' ? LABELS.borrowed : LABELS.available}
+                                        </span>
+                                        {book.loan_status === 'borrowed' && (
+                                            <span> {LABELS.by} {book.borrowing_child}</span>
+                                        )}
+                                    </p>
+
                                     <button
                                         onClick={() => handleDownloadQrCode(`${book.qr_code}.png`)}
-                                        className="text-blue-500 text-sm mt-2 hover:underline"
+                                        className="text-blue-600 text-sm px-3 py-1 rounded-md border border-blue-600 hover:bg-blue-50 transition-colors duration-200"
                                     >
                                         {LABELS.download_qr_code}
                                     </button>
-                                </p>
-                                <button
-                                    onClick={() => toggleExpand(book.qr_code)}
-                                    className="text-blue-500 text-sm mt-2 hover:underline"
-                                >
-                                    {expandedBooks[book.qr_code] ? LABELS.Hide_Details : LABELS.More_Details}
-                                </button>
+                                </div>
+
+                                {/* Bottom controls */}
+                                <div className="absolute bottom-4 inset-x-4 flex justify-between items-center">
+                                    <button
+                                        onClick={() => handleEditBook(book)}
+                                        className="p-2 text-gray-600 hover:text-emerald-600 transition-colors duration-200"
+                                        aria-label={LABELS.edit_book}
+                                    >
+                                        <Edit size={20}/>
+                                    </button>
+
+                                    <button
+                                        onClick={() => toggleExpand(book.qr_code)}
+                                        className="flex items-center gap-1 text-gray-600 hover:text-indigo-600 transition-colors duration-200"
+                                    >
+                                        {expandedBooks[book.qr_code] ? (
+                                            <>
+                                                <span className="text-sm">{LABELS.Hide_Details}</span>
+                                                <ChevronUp size={20}/>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-sm">{LABELS.More_Details}</span>
+                                                <ChevronDown size={20}/>
+                                            </>
+                                        )}
+                                    </button>
+
+                                    <div className="w-8" aria-hidden="true"/>
+                                </div>
+
+                                {/* Expanded details */}
                                 {expandedBooks[book.qr_code] && (
-                                    <div className="mt-2 text-gray-600">
+                                    <div className="mt-8 mb-8 text-gray-600 bg-white p-4 rounded-md border border-gray-100">
                                         <p><strong>{LABELS.description}:</strong> {book.description || 'N/A'}</p>
                                         <p>
                                             <strong>{LABELS.year_of_publication}:</strong> {book.year_of_publication || 'N/A'}
                                         </p>
-                                        <p><strong>{LABELS.cover_type}:</strong> {book.cover_type || 'N/A'}</p>
+                                        <p>
+                                            <strong>{LABELS.cover_type}:</strong> {translateCoverType(book.cover_type, LABELS)}
+                                        </p>
                                         <p><strong>{LABELS.pages}:</strong> {book.pages || 'N/A'}</p>
                                         <p><strong>{LABELS.recommended_age}:</strong> {book.recommended_age || 'N/A'}
                                         </p>
-                                        <p><strong>{LABELS.select_condition}:</strong> {book.book_condition || 'N/A'}
+                                        <p>
+                                            <strong>{LABELS.select_condition}:</strong> {translateBookCondition(book.book_condition, LABELS)}
                                         </p>
                                         <p>
                                             <strong>{LABELS.delivering_parent}:</strong> {book.delivering_parent || 'N/A'}
@@ -296,7 +354,7 @@ const Inventory = () => {
                             </div>
                         ))}
                 </div>
-               </div>
+            </div>
             </div>
             );
             };

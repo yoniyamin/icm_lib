@@ -46,6 +46,8 @@ export const FIELD_LABELS = {
 
     // General Labels
     add_member_button: 'הוסף חבר',
+    edit_member: 'ערוך',
+    delete_member: 'מחק חבר',
     close_add_member_button: 'סגור הוספת חבר',
     add_member_form_title: 'הוספת חבר חדש',
     search_placeholder: 'חפש חברים לפי שם',
@@ -63,9 +65,14 @@ export const FIELD_LABELS = {
     error_kid_name_required: 'נדרש שם ילד.',
     error_email_required: 'נדרשת כתובת אימייל.',
     error_email_invalid: 'כתובת אימייל לא תקינה.',
+    email_missing_warning: 'לא סופק אימייל - לא יישלחו התראות לחבר זה',
+    no_email_provided: 'לא סופק אימייל',
 
     // Success Messages
     success_member_added: 'החבר נוסף בהצלחה!',
+    success_member_updated: 'החבר עודכן בהצלחה!',
+    success_member_deleted: 'חבר נמחק בהצלחה!',
+
 
     // List Item Labels
     parent_name_label: 'שם ההורה',
@@ -97,9 +104,9 @@ export const FIELD_LABELS = {
     hard_cover: 'כריכה קשה',
     rigid_pages: 'עמודים קשיחים',
     battery_book: 'ספר עם בטריה',
-    new: 'חדש',
-    good: 'טוב',
-    worn: 'בלוי',
+    new: 'כמו חדש',
+    good: 'מצויין - בלאי בלתי מורגש',
+    worn: 'טוב - בלאי קל',
     available: 'זמין',
     borrowed: 'מושאל',
 
@@ -109,6 +116,7 @@ export const FIELD_LABELS = {
     error_book_description_required: 'נדרש תיאור.',
     error_book_year_required: 'נדרשת שנת הוצאה.',
     error_book_pages_required: 'נדרש מספר עמודים.',
+    confirm_delete_member: 'האם אתה בטוח שברצונך למחוק חבר זה?',
 
     // Reports labels
     inventory_report: 'דוח מלאי',
@@ -121,5 +129,7 @@ export const FIELD_LABELS = {
     order: 'סדר',
     include_history: 'כלול היסטורית השאלות',
     include_borrowed: 'כלול ספרים מושאלים',
+    update_book_button: 'עדכון ספר',
+    edit_book: 'ערוך ספר',
 
 };

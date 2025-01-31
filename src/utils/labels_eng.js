@@ -46,6 +46,8 @@ export const FIELD_LABELS = {
 
     // General Labels
     add_member_button: 'Add Member',
+    edit_member: 'Edit Member',
+    delete_member: 'Delete Member',
     close_add_member_button: 'Close Add Member',
     add_member_form_title: 'Add New Member',
     search_placeholder: 'Search members by name',
@@ -63,9 +65,14 @@ export const FIELD_LABELS = {
     error_kid_name_required: 'Kid\'s name is required.',
     error_email_required: 'Email address is required.',
     error_email_invalid: 'Invalid email address.',
+    email_missing_warning: 'No email provided - notifications will not be sent to this member',
+    confirm_delete_member: 'Are you sure you want to delete this member?',
+    no_email_provided: 'No email provided',
 
     // Success Messages
     success_member_added: 'Member added successfully!',
+    success_member_updated: 'Member updates successfully!',
+    success_member_deleted: 'Member deleted successfully!',
 
     // List Item Labels
     parent_name_label: 'Parent Name',
@@ -97,9 +104,9 @@ export const FIELD_LABELS = {
     hard_cover: 'Hard Cover',
     rigid_pages: 'Rigid Pages',
     battery_book: 'Book with Battery',
-    new: 'New',
-    good: 'Good',
-    worn: 'Worn',
+    new: 'Like New',
+    good: 'Excellent - No noticeable wear',
+    worn: 'Good - Minor wear',
     available: 'Available',
     borrowed: 'Borrowed',
 
@@ -121,4 +128,6 @@ export const FIELD_LABELS = {
     order: 'Order',
     include_history: 'Include Historical Loans',
     include_borrowed: 'Include Currently Borrowed Books',
+    update_book_button: 'Update book information',
+    edit_book: 'Edit book information',
 };

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { addMemberService, fetchMembers } from "../services/services";
+import { addMemberService, fetchMembers, updateMemberService, deleteMemberService } from "../services/services";
 import { useLanguage } from '../context/LanguageContext';
 import { getFieldLabels } from '../utils/labels';
+import { Edit, Trash2 } from 'lucide-react';
 
 function Members() {
     const [members, setMembers] = useState([]); // Ensure it's initialized as an array
@@ -14,14 +15,14 @@ function Members() {
     const [successMessage, setSuccessMessage] = useState(""); // Initialize success message state
     const { language, toggleLanguage, direction } = useLanguage();
     const LABELS = getFieldLabels(language);
+    const [editingMemberId, setEditingMemberId] = useState(null);
+    const [setExpandedMembers] = useState({});
 
     const validateForm = () => {
         const newErrors = {};
         if (!parentName.trim()) newErrors.parentName = LABELS.error_parent_name_required;
         if (!kidName.trim()) newErrors.kidName = LABELS.error_kid_name_required;
-        if (!email.trim()) {
-            newErrors.email = LABELS.error_email_required;
-        } else if (!/\S+@\S+\.\S+/.test(email)) {
+        if (email.trim() && !/\S+@\S+\.\S+/.test(email)) {
             newErrors.email = LABELS.error_email_invalid;
         }
         setErrors(newErrors); // Update error messages
@@ -31,21 +32,62 @@ function Members() {
     const handleAddMember = async (e) => {
         e.preventDefault();
         if (!validateForm()) return; // Stop if validation fails
+        // Show warning if no email
+        if (!email.trim()) {
+            alert(LABELS.email_missing_warning);
+        }
 
         try {
-            await addMemberService({ parent_name: parentName, kid_name: kidName, email });
+            const memberData = { parent_name: parentName, kid_name: kidName, email };
+
+            if (editingMemberId) {
+                await updateMemberService(editingMemberId, memberData);
+            } else {
+                await addMemberService(memberData);
+            }
+
+            // Reset form
+            setEditingMemberId(null);
             setParentName("");
             setKidName("");
             setEmail("");
             setErrors({});
-            setSuccessMessage(LABELS.success_member_added); // Show success message
-            await loadMembers(); // Refresh the members list
+            setSuccessMessage(editingMemberId ? LABELS.success_member_updated : LABELS.success_member_added);
+            await loadMembers();
         } catch (error) {
-            console.error("Error adding member:", error);
-            setSuccessMessage(""); // Reset success message on failure
+            console.error("Error saving member:", error);
+            setSuccessMessage("");
         }
     };
 
+    const handleDeleteMember = async (id) => {
+        if (window.confirm(LABELS.confirm_delete_member)) {
+            try {
+                await deleteMemberService(id);
+                setSuccessMessage(LABELS.success_member_deleted);
+                await loadMembers();
+            } catch (error) {
+                console.error("Error deleting member:", error);
+                // You can update the UI to display an error message
+                alert("Cannot delete member: they have open loans.");
+            }
+        }
+    };
+
+    const handleEditMember = (member) => {
+        setEditingMemberId(member.id);
+        setParentName(member.parent_name);
+        setKidName(member.kid_name);
+        setEmail(member.email);
+        setShowAddMember(true);
+    };
+
+    const toggleExpand = (memberId) => {
+        setExpandedMembers(prev => ({
+            ...prev,
+            [memberId]: !prev[memberId]
+        }));
+    };
 
     // Fetch members from the backend
     const loadMembers = async () => {
@@ -145,20 +187,41 @@ function Members() {
             {/* Member List */}
             <div dir={direction}>
                 <div className="overflow-y-auto max-h-96 border-t pt-4">
-                    {filteredMembers.length > 0 ? (
-                        filteredMembers.map((member) => (
-                            <div key={member.id} className="bg-gray-50 shadow-sm rounded-lg p-4 mb-2">
+                    {filteredMembers.map((member) => (
+                        <div key={member.id} className="bg-gray-50 shadow-sm rounded-lg p-4 mb-2 relative">
+                            <div className="mb-4">
                                 <h2 className="font-bold text-gray-800">{LABELS.parent_name_label}: {member.parent_name}</h2>
                                 <p className="text-sm text-gray-500">{LABELS.kid_name_label}: {member.kid_name}</p>
-                                <p className="text-sm text-gray-500">{LABELS.email_label}: {member.email}</p>
+                                <p className="text-sm mb-8 text-gray-500">{LABELS.email_label}: {member.email || LABELS.no_email_provided}</p>
                             </div>
-                        ))
-                    ) : (
-                        <p className="text-sm text-gray-500">{filteredMembers.length === 0 && LABELS.no_members_found}</p>
-                    )}
+
+                            {/* Controls */}
+                            <div className="absolute bottom-4 inset-x-4 flex justify-between items-center">
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleDeleteMember(member.id)}
+                                        className="text-gray-600 hover:text-red-600 transition-colors duration-200"
+                                        aria-label={LABELS.delete_member}
+                                    >
+                                        <Trash2 size={20}/>
+                                    </button>
+
+                                    <button
+                                        onClick={() => handleEditMember(member)}
+                                        className="p-2 text-gray-600 hover:text-emerald-600 transition-colors duration-200"
+                                        aria-label={LABELS.edit_member}
+                                    >
+                                        <Edit size={20}/>
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
-        );}
+    );
+}
 
-            export default Members;
+export default Members;

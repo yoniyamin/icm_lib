@@ -275,3 +275,8 @@ select {
 .hidden-checkbox:focus + .checkbox-mark {
   outline: 2px solid #FEC43C;
 }
+
+.no-reminder {
+  color: red;
+  font-weight: bold;
+}

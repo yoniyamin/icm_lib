@@ -40,10 +40,6 @@ const Inventory = () => {
         { value: 'טוב - בלאי קל', label: LABELS.worn },
     ];
 
-    const LOAN_STATUS_OPTIONS = [
-        { value: 'available', label: LABELS.available },
-        { value: 'borrowed', label: LABELS.borrowed }
-    ];
 
     useEffect(() => {
         loadBooks();

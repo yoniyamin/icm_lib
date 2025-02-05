@@ -37,6 +37,7 @@ export const FIELD_LABELS = {
     download_qr_code: "הורד ברקוד",
     SendReminders: "שלח תזכורת",
     last_reminder: "תזכורת אחרונה ב",
+    no_reminder_sent: "לא נשלחה תזכורת",
     sending_reminders: "שולח...",
     send_x_reminders: "שלח {count} תזכורות",
     error_generating_report: "הפקת הדוח נכשלה, נסה שנית בבקשה.",
@@ -56,8 +57,10 @@ export const FIELD_LABELS = {
     select_all: 'בחר הכל',
 
     // Form Placeholders and Labels
-    parent_name_placeholder: 'שם ההורה',
-    kid_name_placeholder: 'שם הילד',
+    parent_name_placeholder: 'שם ההורה המשאיל',
+    kid_name_placeholder: 'שם הילד המשאיל',
+    parent_name_borrower: 'ההורה',
+    kid_name_borrower: 'הילד',
     email_placeholder: 'כתובת אימייל',
 
     // Form Error Messages

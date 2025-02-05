@@ -102,27 +102,46 @@ const ReportGenerationTab = () => {
                                 <div className="grid grid-cols-2 gap-2">
                                     {reportType === 'loans' && (
                                         <div className="flex items-center col-span-2">
-                                            <input
-                                                type="checkbox"
-                                                checked={includeHistory}
-                                                onChange={(e) => setIncludeHistory(e.target.checked)}
-                                                className="mr-2"
-                                            />
-                                            <label>{LABELS.include_history}</label>
+                                            <div className="flex items-center space-x-2">
+                                                <button
+                                                    onClick={() => setIncludeHistory(!includeHistory)}
+                                                    className={`relative inline-flex h-6 w-10 items-center rounded-full transition-colors duration-200 ease-in-out ${
+                                                        includeHistory ? 'bg-teal-600' : 'bg-gray-200'
+                                                    }`}
+                                                >
+                                                <span
+                                                    className={`absolute left-1 top-1 h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out ${
+                                                        includeHistory ? (language === 'he' ? 'translate-x-[1px]' : 'translate-x-4')
+                                                            : (language === 'he' ? 'translate-x-4' : 'translate-x-[1px]')
+                                                    }`}
+                                                />
+                                                </button>
+                                                <span className="text-sm text-gray-600">{LABELS.include_history}</span>
+                                            </div>
+
                                         </div>
                                     )}
 
                                     {reportType === 'inventory' && (
                                         <div className="flex items-center col-span-2">
-                                            <input
-                                                type="checkbox"
-                                                checked={includeBorrowed}
-                                                onChange={(e) => setIncludeBorrowed(e.target.checked)}
-                                                className="mr-2"
-                                            />
-                                            <label>{LABELS.include_borrowed}</label>
+                                            <div className="flex items-center space-x-2">
+                                                <button
+                                                    onClick={() => setIncludeBorrowed(!includeBorrowed)}
+                                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out ${
+                                                        includeBorrowed ? 'bg-teal-600' : 'bg-gray-200'
+                                                    }`}
+                                                >
+                                                <span
+                                                    className={`absolute left-1 top-1 h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out ${
+                                                        includeBorrowed ? (language === 'he' ? 'translate-x-[1px]' : 'translate-x-4')
+                                                            : (language === 'he' ? 'translate-x-4' : 'translate-x-[1px]')
+                                                    }`}
+                                                />
+                                                </button>
+                                                <span className="text-sm text-gray-600">{LABELS.include_borrowed}</span>
+                                            </div>
                                         </div>
-                                    )}
+                                        )}
 
                                     <div className="flex flex-col">
                                         <label>{LABELS['sort_by']}</label>
@@ -134,7 +153,7 @@ const ReportGenerationTab = () => {
                                             <option value="">{LABELS['select_field']}</option>
                                             {sortOptions[reportType].map((option) => (
                                                 <option key={option.value} value={option.value}>
-                                                    {option.label}
+                                                {option.label}
                                                 </option>
                                             ))}
                                         </select>
@@ -155,8 +174,8 @@ const ReportGenerationTab = () => {
 
                                 <button onClick={generateReport} disabled={!sortField}
                                         className="w-full p-2 bg-teal-500 text-white rounded-md">
-                                    <Download className="w-4 h-4 mr-2"/>
-                                    {LABELS['generate_report_button']}
+                                    {LABELS.generate_report_button} <Download className="w-4 h-4 mr-2"/>
+
                                 </button>
                             </div>
                         )}

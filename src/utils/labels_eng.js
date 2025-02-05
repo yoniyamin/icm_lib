@@ -37,6 +37,7 @@ export const FIELD_LABELS = {
     download_qr_code: "Download QR Code",
     SendReminders: "Send Reminders",
     last_reminder: "last reminder at",
+    no_reminder_sent: "No Reminders Sent",
     sending_reminders: "Sending...",
     send_x_reminders: "Send {count} Reminders",
     error_generating_report: "Failed to generate report. Please try again.",
@@ -58,6 +59,8 @@ export const FIELD_LABELS = {
     // Form Placeholders and Labels
     parent_name_placeholder: 'Parent\'s Name',
     kid_name_placeholder: 'Kid\'s Name',
+    parent_name_borrower: 'Parent',
+    kid_name_borrower: 'Kid',
     email_placeholder: 'Email Address',
 
     // Form Error Messages

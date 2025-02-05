@@ -37,6 +37,7 @@ function Loans() {
     const [isReminderSending, setIsReminderSending] = useState(false);
     const { language, toggleLanguage, direction } = useLanguage();
     const LABELS = getFieldLabels(language);
+    const [displayParentName, setDisplayParentName] = useState(true);
 
 
 
@@ -106,7 +107,9 @@ function Loans() {
 
     const borrowerOptions = members.map((member) => ({
         value: member.id,
-        label: member.parent_name,
+        label: displayParentName ? member.parent_name : member.kid_name,
+        parentName: member.parent_name,
+        childName: member.kid_name
     }));
 
     const bookOptions = availableBooks.map((book) => ({
@@ -153,7 +156,8 @@ function Loans() {
                                 borrower_name: loan.borrower_name,
                                 book_title: loan.book_title,
                                 borrowed_at: loan.borrowed_at
-                            }
+                            },
+                            language
                         );
 
                         if (response.success) {
@@ -430,33 +434,62 @@ function Loans() {
             {scanMode === 'borrow' && (
                 <div className="space-y-4">
                     {/* Borrower Dropdown */}
-                    <Select
-                        options={borrowerOptions}
-                        placeholder={LABELS.borrower}
-                        value={selectedBorrower ? { value: selectedBorrower.id, label: selectedBorrower.parent_name } : null}
-                        onChange={(selectedOption) => {
-                            const selectedMember = members.find((member) => member.id === selectedOption?.value);
-                            setSelectedBorrower(selectedMember || null);
-                        }}
-                        isClearable
-                        styles={{
-                            control: (provided) => ({
-                                ...provided,
-                                borderColor: brandColors.coral,
-                                borderRadius: '4px',
-                                boxShadow: 'none',
-                                '&:hover': { borderColor: brandColors.teal },
-                            }),
-                        }}
-                        className="w-full"
-                        classNamePrefix="borrower-select"
-                    />
+                    <div className="flex items-center space-x-2">
+                        <Select
+                            options={borrowerOptions}
+                            placeholder={displayParentName ? LABELS.parent_name_placeholder : LABELS.kid_name_placeholder}
+                            value={selectedBorrower ? {
+                                value: selectedBorrower.id,
+                                label: displayParentName ? selectedBorrower.parent_name : selectedBorrower.kid_name
+                            } : null}
+                            onChange={(selectedOption) => {
+                                if (selectedOption) {
+                                    const selectedMember = members.find(
+                                        (member) =>
+                                            member.id === selectedOption.value ||
+                                            member.parent_name === selectedOption.label ||
+                                            member.kid_name === selectedOption.label
+                                    );
+                                    setSelectedBorrower(selectedMember || null);
+                                } else {
+                                    setSelectedBorrower(null);
+                                }
+                            }}
+                            isClearable
+                            styles={{
+                                control: (provided) => ({
+                                    ...provided,
+                                    borderColor: brandColors.coral,
+                                    borderRadius: '4px',
+                                    boxShadow: 'none',
+                                    '&:hover': {borderColor: brandColors.teal},
+                                }),
+                            }}
+                            className="w-full flex-grow"
+                            classNamePrefix="borrower-select"
+                        />
+                        <button
+                            onClick={() => setDisplayParentName(!displayParentName)}
+                            className={`relative inline-flex h-6 w-16 items-center rounded-full transition-colors duration-200 ease-in-out ${
+                                displayParentName ? 'bg-teal-600' : 'bg-gray-200'
+                            }`}
+                        >
+                        <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-gray-300 transition duration-200 ease-in-out ${
+                                    displayParentName ? 'translate-x-6' : 'translate-x-1'
+                                }`}
+                            />
+                                            </button>
+                                            <span className="text-sm text-gray-600">
+                            {displayParentName ? LABELS.parent_name_borrower : LABELS.kid_name_borrower}
+                        </span>
+                    </div>
 
                     {/* Display Book title */}
                     <Select
                         options={bookOptions}
                         placeholder={LABELS.Select_Book}
-                        value={selectedBook ? { value: selectedBook.qr_code, label: selectedBook.title } : null}
+                        value={selectedBook ? {value: selectedBook.qr_code, label: selectedBook.title} : null}
                         onChange={(selectedOption) => {
                             const selectedBook = availableBooks.find((book) => book.qr_code === selectedOption?.value);
                             setSelectedBook(selectedBook || null);
@@ -470,7 +503,7 @@ function Loans() {
                                 borderColor: brandColors.coral,
                                 borderRadius: '4px',
                                 boxShadow: 'none',
-                                '&:hover': { borderColor: brandColors.teal },
+                                '&:hover': {borderColor: brandColors.teal},
                             }),
                         }}
                         className="w-full"
@@ -507,7 +540,6 @@ function Loans() {
                             <option value="טוב - בלאי קל">{LABELS.worn}</option>
                         </select>
                     )}
-
 
 
                     {/* QR Code Scan Button */}
@@ -617,15 +649,20 @@ function Loans() {
                         </button>
                     </div>
                     <div className="flex items-center my-4">
-                        <label className="ml-4 flex items-center cursor-pointer">
-                            <input
-                                id="checkbox_showall"
-                                type="checkbox"
-                                checked={showAllLoans}
-                                onChange={handleShowAllChange}
-                                className="w-4 h-4 text-teal-500 border-gray-300 rounded focus:ring-teal-500 cursor-pointer"
+                        <label className="flex items-center space-x-2">
+                            <button
+                                onClick={(e) => handleShowAllChange({target: {checked: !showAllLoans}})}
+                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out ${
+                                    showAllLoans ? 'bg-teal-600' : 'bg-gray-200'
+                                }`}
+                            >
+                            <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out ${
+                                    showAllLoans ? 'translate-x-6' : 'translate-x-1'
+                                }`}
                             />
-                            <span className="ml-2">{LABELS.ShowAllLoans}</span>
+                            </button>
+                            <span className="text-sm text-gray-600">{LABELS.ShowAllLoans}</span>
                         </label>
                     </div>
 
@@ -697,20 +734,31 @@ function Loans() {
 
                                     <div className="loan-history-card-body">
                                         <div className="loan-history-card-detail">
-                                            {LABELS.borrowed_by}: {loan.borrower_name}
+                                            {LABELS.borrowed_by} {loan.borrower_name}
+                                        </div>
+                                        <div className="loan-history-card-detail">
+                                            {LABELS.kid_name_borrower}: {loan.borrower_child || 'N/A'}
                                         </div>
                                         <div className="loan-history-card-detail">
                                             {LABELS.borrow_date}: {loan.borrowed_at}
                                         </div>
-                                        <div className="loan-history-card-detail">
-                                            {LABELS.return_date}: {loan.returned_at || 'Not Returned'}
-                                        </div>
+                                        {loan.returned_at && (
+                                            <div className="loan-history-card-detail">
+                                                {LABELS.return_date}: {loan.returned_at}
+                                            </div>
+                                        )}
                                         <div className="loan-history-card-detail">
                                             {LABELS.delivery_status}: {loan.book_state || 'N/A'}
                                         </div>
-                                        <div className="loan-history-card-detail">
-                                            {LABELS.last_reminder}: {loan.last_reminder_date || 'No Reminders Sent'}
-                                        </div>
+                                        {loan.last_reminder_date ? (
+                                            <div className="loan-history-card-detail">
+                                                {LABELS.last_reminder}: {loan.last_reminder_date}
+                                            </div>
+                                        ) : (
+                                            <div className="loan-history-card-detail no-reminder">
+                                                {LABELS.no_reminder_sent}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}

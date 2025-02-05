@@ -95,21 +95,18 @@ export async function fetchOpenLoans(qrCode = null) {
     return response.data;
 }
 
-export const sendReminder = async (loanId, subject, loanDetails) => {
+export const sendReminder = async (loanId, subject, loanDetails, language = 'en') => {
     try {
         const response = await axiosInstance.post(`/api/send-reminder`, {
             loan_id: loanId,
             subject,
-            loan_details: loanDetails
+            loan_details: loanDetails,
+            language
         });
-
-        return response.data; // Return backend response
+        return response.data;
     } catch (error) {
         console.error(`Error sending reminder for loan_id ${loanId}:`, error);
-
-        // 🔥 Extract the backend error message if it exists
         const errorMessage = error.response?.data?.error || error.message || 'Unknown error';
-
         return { success: false, error: errorMessage };
     }
 };

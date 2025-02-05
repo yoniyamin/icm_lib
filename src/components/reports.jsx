@@ -52,7 +52,10 @@ const ReportGenerationTab = () => {
 
 
     return (
-        <div className={`report-container ${language === 'he' ? 'rtl' : ''}`}>
+        <div
+            className={`report-container ${language === 'he' ? 'rtl' : ''}`}
+            dir={language === 'he' ? 'rtl' : 'ltr'}
+        >
             <button
                 className="w-12 h-12 flex items-center justify-center rounded-full border border-teal-500 bg-white text-teal-500 shadow-md absolute top-4 left-4"
                 onClick={toggleLanguage}
@@ -67,12 +70,12 @@ const ReportGenerationTab = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Report Type Selection */}
-                    <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="bg-gray-50 p-4 rounded-lg" dir={language === 'he' ? 'rtl' : 'ltr'}>
                         <h3 className="text-md font-semibold text-teal-600 mb-3 flex items-center">
                             <FileText className="w-4 h-4 mr-2"/>
                             {LABELS['select_report_type']}
                         </h3>
-                        <div className="space-y-2">
+                        <div className="space-y-2" dir={language === 'he' ? 'rtl' : 'ltr'}>
                             {['inventory', 'loans'].map((type) => (
                                 <button
                                     key={type}

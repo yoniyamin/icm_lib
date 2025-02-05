@@ -46,6 +46,11 @@ const Inventory = () => {
         loadMembers();
     }, [orderBy]);
 
+    useEffect(() => {
+        // Scroll to the top when the component mounts
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
+
     const loadBooks = async () => {
         try {
             const data = await fetchBooks(orderBy);

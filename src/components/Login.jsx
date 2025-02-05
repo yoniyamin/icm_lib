@@ -9,9 +9,12 @@ const Login = ({ onLogin }) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true); // Start loading
+
         try {
             const response = await axios.post(`${BASE_URL}/api/login`, { username, password });
             if (response.status === 200) {
@@ -23,6 +26,7 @@ const Login = ({ onLogin }) => {
         } catch (err) {
             setError("Invalid username or password.");
         }
+        setLoading(false); // Stop loading after response
     };
 
     return (
@@ -55,9 +59,14 @@ const Login = ({ onLogin }) => {
                 </div>
                 <button
                     type="submit"
-                    className="w-full bg-blue-500 text-white py-2 rounded"
+                    className={`w-full py-2 rounded transition ${
+                        loading
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-blue-500 hover:bg-blue-600"
+                    } text-white font-semibold`}
+                    disabled={loading} // Disable button when loading
                 >
-                    Login
+                    {loading ? "Logging in..." : "Login"}
                 </button>
             </form>
         </div>

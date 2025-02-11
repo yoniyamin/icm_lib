@@ -1,6 +1,6 @@
 export const FIELD_LABELS = {
     by: 'by',
-    app_title: 'The Library of the Israeli Community of Madrid',
+    app_title: 'Israeli Community of Madrid Library',
     title: "Book Title",
     author: "Author",
     description: "Description",
@@ -25,7 +25,7 @@ export const FIELD_LABELS = {
     Hide_Details: "Hide Details",
     More_Details: "More Details",
     loan_status: "Availability",
-    sort_by: "Sort By",
+    sort_by: "Order",
     ascending: "Ascending",
     descending: "Descending",
     Hide_Add_Book: "Hide Add Book",
@@ -133,4 +133,15 @@ export const FIELD_LABELS = {
     include_borrowed: 'Include Currently Borrowed Books',
     update_book_button: 'Update book information',
     edit_book: 'Edit book information',
+
+    // Login screen
+    login_title: "Library Login",
+    username: "Username",
+    password: "Password",
+    username_placeholder: "Enter username",
+    password_placeholder: "Enter password",
+    login_button: "Login",
+    logging_in: "Logging in...",
+    invalid_credentials: "Invalid username or password.",
+
 };

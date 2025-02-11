@@ -146,7 +146,7 @@ const Inventory = () => {
     return (
         <div className="w-full max-w-md mx-auto">
             <button
-                className="w-12 h-12 flex items-center justify-center rounded-full border border-teal-500 bg-white text-teal-500 shadow-md absolute top-4 left-4"
+                className="w-12 h-12 flex items-center justify-center rounded-full border border-teal-500 bg-white/50 text-teal-500 shadow-md absolute top-2 left-2"
                 onClick={toggleLanguage}
             >
                 {language === 'en' ? 'HE' : 'EN'}
@@ -159,19 +159,16 @@ const Inventory = () => {
                     placeholder={LABELS.search_books_placeholder}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1 mr-4 border border-gray-300 rounded-md py-2 px-4"
+                    className="flex-1 mr-4 border border-gray-300 rounded-md py-1.5 px-4"
                 />
                 <div className="sorting-container">
-                    <label htmlFor="orderBy" className="mr-2">:{LABELS.sort_by}</label>
-                    <select
-                        id="orderBy"
-                        value={orderBy}
-                        onChange={(e) => setOrderBy(e.target.value)}
-                        className="border rounded p-1"
+                    <button
+                        onClick={() => setOrderBy(orderBy === "desc" ? "asc" : "desc")}
+                        className="p-2 border rounded bg-gray-100 hover:bg-gray-200 transition"
+                        aria-label={LABELS.sort_by}
                     >
-                        <option value="desc">{LABELS.descending}</option>
-                        <option value="asc">{LABELS.ascending}</option>
-                    </select>
+                        {orderBy === "desc" ? <ChevronDown size={20}/> : <ChevronUp size={20}/>}
+                    </button>
                 </div>
             </div>
 

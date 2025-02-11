@@ -9,7 +9,7 @@ import { LanguageProvider, useLanguage } from './context/LanguageContext'; // Im
 import { getFieldLabels } from './utils/labels';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@radix-ui/react-tabs';
 import { BookOpen, Users, QrCode, BarChart } from 'lucide-react';
-import BannerImage from './static/img.png';
+import BannerImage from './static/banner_nobg.png';
 
 
 function App() {
@@ -33,10 +33,10 @@ function AppContent() {
     return (
         <div className="app-container min-h-screen bg-blend-screen max-w-md mx-auto">
             {/* Header with Banner */}
-            <header className="bg-white">
-                <div className="max-w-md mx-auto flex items-start justify-items-center p-4">
-                    <img src={BannerImage} alt="ICM Library Logo" className="max-h-16 sm:max-h-20"/>
-                    <div className="logo">
+            <header className="bg-white drop-shadow-2xl rounded-full">
+                <div className="banner-container">
+                    <img src={BannerImage} alt="ICM Library Logo" className="banner-logo"/>
+                    <div className="banner-text">
                         <p className="text-sm text-gray-600">{LABELS.app_title}</p>
                     </div>
                 </div>
@@ -44,8 +44,8 @@ function AppContent() {
 
             {/* Main Content with Tabs */}
             <div className="max-w-md mx-auto">
-                <Tabs defaultValue="inventory" className="w-full">
-                    <TabsList className="tabs-list w-full bg-white shadow-md rounded-lg grid grid-cols-4">
+                <Tabs defaultValue="inventory" className="tabs-content">
+                    <TabsList className="tabs-list w-full shadow-md rounded-lg grid grid-cols-4">
                         <TabsTrigger
                             value="inventory"
                             className="tab-item flex items-center justify-center data-[state=active]:bg-teal-500 data-[state=active]:text-white text-gray-800 py-2 rounded-t-lg hover:bg-gray-100"
@@ -75,6 +75,7 @@ function AppContent() {
                             {LABELS.reports}
                         </TabsTrigger>
                     </TabsList>
+                    <div style={{height: '15px'}}></div>
 
                     <TabsContent value="inventory">
                         <Inventory/>

@@ -1,74 +1,128 @@
-// eslint-disable-next-line no-unused-vars
 import React, { useState } from "react";
 import axios from "axios";
 import BannerImage from "../static/img.png";
+import BookshelfImage from "../static/bookshelf.png";
 import BASE_URL from "../utils/apiConfig.js";
+import { useLanguage } from '../context/LanguageContext';
+import { getFieldLabels } from '../utils/labels';
 
-// eslint-disable-next-line react/prop-types
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const { language, toggleLanguage, direction } = useLanguage();
+    const LABELS = getFieldLabels(language);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true); // Start loading
+        setLoading(true);
 
         try {
             const response = await axios.post(`${BASE_URL}/api/login`, { username, password });
             if (response.status === 200) {
-                // Save token to localStorage for persistence
                 localStorage.setItem("authToken", response.data.token);
                 onLogin();
             }
-            // eslint-disable-next-line no-unused-vars
         } catch (err) {
-            setError("Invalid username or password.");
+            setError(LABELS.invalid_credentials);
         }
-        setLoading(false); // Stop loading after response
+        setLoading(false);
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <form
-                onSubmit={handleSubmit}
-                className="bg-white p-6 rounded shadow-md w-80"
+        <div className="min-h-screen relative flex items-center justify-center">
+            {/* Language Toggle Button */}
+            <button
+                className="w-12 h-12 flex items-center justify-center rounded-full border border-teal-500 bg-white text-teal-500 shadow-md absolute top-2 left-2"
+                onClick={toggleLanguage}
             >
-                <img src={BannerImage} alt="ICM Library Logo"
-                     className="max-h-16 sm:max-h-20 mx-auto mb-4"/>
-                <h1 className="text-xl font-semibold mb-4">Login</h1>
-                {error && <div className="text-red-500 text-sm mb-2">{error}</div>}
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm mb-2">Username</label>
-                    <input
-                        type="text"
-                        className="w-full p-2 border rounded"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                {language === 'en' ? 'HE' : 'EN'}
+            </button>
+
+            {/* Background Image */}
+            <div
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
+                style={{
+                    backgroundImage: `url(${BookshelfImage})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                }}
+            />
+
+            {/* Login Form Container */}
+            <div className="relative z-10 w-full max-w-[320px] sm:max-w-[380px] mx-4 rounded-3xl overflow-hidden shadow-xl">
+                {/* Banner Container */}
+                <div className="bg-white rounded-3xl p-4">
+                    <img
+                        src={BannerImage}
+                        alt="ICM Library Logo"
+                        className="h-12 sm:h-16 w-auto mx-auto"
                     />
                 </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-sm mb-2">Password</label>
-                    <input
-                        type="password"
-                        className="w-full p-2 border rounded"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
+
+                {/* Login Form */}
+                <div dir={direction}>
+                    <form
+                        onSubmit={handleSubmit}
+                        className="backdrop-blur-sm bg-white/20 p-6 sm:p-8 rounded-3xl"
+                    >
+                        <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center text-gray-800">
+                            {LABELS.login_title}
+                        </h1>
+
+                        {error && (
+                            <div className="text-red-500 text-sm mb-4 bg-red-50 p-2 rounded">
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-gray-700 text-sm font-medium mb-2">
+                                    {LABELS.username}
+                                </label>
+                                <input
+                                    type="text"
+                                    className="w-full p-2.5 sm:p-3 border border-gray-200 rounded-md
+                                             bg-white/50 backdrop-blur-sm focus:ring-2
+                                             focus:ring-blue-500 focus:border-transparent"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    placeholder={LABELS.username_placeholder}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-gray-700 text-sm font-medium mb-2">
+                                    {LABELS.password}
+                                </label>
+                                <input
+                                    type="password"
+                                    className="w-full p-2.5 sm:p-3 border border-gray-200 rounded-md
+                                             bg-white/50 backdrop-blur-sm focus:ring-2
+                                             focus:ring-blue-500 focus:border-transparent"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder={LABELS.password_placeholder}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                className={`w-full py-2.5 sm:py-3 rounded-md transition duration-200 
+                                         ${loading
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-blue-500 hover:bg-blue-600 active:bg-blue-700"
+                                } text-white font-semibold shadow-md`}
+                                disabled={loading}
+                            >
+                                {loading ? LABELS.logging_in : LABELS.login_button}
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <button
-                    type="submit"
-                    className={`w-full py-2 rounded transition ${
-                        loading
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-blue-500 hover:bg-blue-600"
-                    } text-white font-semibold`}
-                    disabled={loading} // Disable button when loading
-                >
-                    {loading ? "Logging in..." : "Login"}
-                </button>
-            </form>
+            </div>
         </div>
     );
 };

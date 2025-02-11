@@ -135,4 +135,13 @@ export const FIELD_LABELS = {
     update_book_button: 'עדכון ספר',
     edit_book: 'ערוך ספר',
 
+    // Login screen
+    login_title: "כניסה לספרייה",
+    username: "שם משתמש",
+    password: "סיסמה",
+    username_placeholder: "הכנס שם משתמש",
+    password_placeholder: "הכנס סיסמה",
+    login_button: "כניסה",
+    logging_in: "מתחבר...",
+    invalid_credentials: "שם משתמש או סיסמה לא נכונים.",
 };

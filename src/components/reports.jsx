@@ -57,8 +57,7 @@ const ReportGenerationTab = () => {
             dir={language === 'he' ? 'rtl' : 'ltr'}
         >
             <button
-                className="w-12 h-12 flex items-center justify-center rounded-full border border-teal-500 bg-white text-teal-500 shadow-md absolute top-4 left-4"
-                onClick={toggleLanguage}
+                className="w-12 h-12 flex items-center justify-center rounded-full border border-teal-500 bg-white/50 text-teal-500 shadow-md absolute top-2 left-2"                onClick={toggleLanguage}
             >
                 {language === 'en' ? 'HE' : 'EN'}
             </button>

@@ -399,7 +399,7 @@ function Loans() {
             )}
             <div className="flex gap-4 mb-4">
                 {/* Language Toggle Button */}
-                <div className="absolute top-4 left-4">
+                <div className="absolute top-2 left-2">
                     <button
                         className="w-12 h-12 flex items-center justify-center rounded-full border border-teal-500 bg-white text-teal-500 shadow-md"
                         onClick={toggleLanguage}

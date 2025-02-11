@@ -8,7 +8,7 @@ import Reports from './components/Reports';
 import { LanguageProvider, useLanguage } from './context/LanguageContext'; // Import the context
 import { getFieldLabels } from './utils/labels';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@radix-ui/react-tabs';
-import { BookOpen, Users, QrCode, BarChart } from 'lucide-react';
+import { BookOpen, Users, QrCode, BarChart, LogOut } from 'lucide-react';
 import BannerImage from './static/banner_nobg.png';
 
 
@@ -19,14 +19,18 @@ function App() {
         setIsAuthenticated(true);
     };
 
+    const handleLogout = () => {
+        setIsAuthenticated(false);
+    };
+
     return (
         <LanguageProvider>
-            {isAuthenticated ? <AppContent /> : <Login onLogin={handleLogin} />}
+            {isAuthenticated ? <AppContent onLogout={handleLogout} /> : <Login onLogin={handleLogin} />}
         </LanguageProvider>
     );
 }
 
-function AppContent() {
+function AppContent({onLogout}) {
     const { language } = useLanguage();
     const LABELS = getFieldLabels(language);
 
@@ -40,6 +44,10 @@ function AppContent() {
                         <p className="text-sm text-gray-600">{LABELS.app_title}</p>
                     </div>
                 </div>
+                {/* Logout Button */}
+                <button className="logout-button" onClick={onLogout} title="Logout">
+                    <LogOut className="logout-icon"/>
+                </button>
             </header>
 
             {/* Main Content with Tabs */}

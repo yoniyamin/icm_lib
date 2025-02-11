@@ -54,6 +54,38 @@
   }
 }
 
+/* Logout Button */
+.logout-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  border: none;
+  padding: 1px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease-in-out;
+  z-index: 3; /* Ensure it's above the overlay */
+}
+
+/* Increase contrast on hover */
+.logout-button:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+}
+
+/* Logout Icon */
+.logout-icon {
+  width: 24px;
+  height: 24px;
+  color: #e3342f;
+}
+
+/* Darker color on hover */
+.logout-button:hover .logout-icon {
+  color: #cc1f1a;
+}
+
+
 /* Root container adjustments for responsive layout */
 #root {
   max-width: 1280px;

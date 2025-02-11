@@ -459,6 +459,8 @@ function Loans() {
                             styles={{
                                 control: (provided) => ({
                                     ...provided,
+                                    textAlign: language === 'he' ? 'right' : 'left',
+                                    direction: language === 'he' ? 'rtl' : 'ltr',
                                     borderColor: brandColors.coral,
                                     borderRadius: '4px',
                                     boxShadow: 'none',
@@ -500,6 +502,8 @@ function Loans() {
                         styles={{
                             control: (provided) => ({
                                 ...provided,
+                                textAlign: language === 'he' ? 'right' : 'left',
+                                direction: language === 'he' ? 'rtl' : 'ltr',
                                 borderColor: brandColors.coral,
                                 borderRadius: '4px',
                                 boxShadow: 'none',
@@ -609,7 +613,9 @@ function Loans() {
                                 }
                             }}
                             className="w-full p-2 border rounded"
-                            style={{borderColor: brandColors.coral}}
+                            style={{borderColor: brandColors.coral,
+                                    textAlign: language === 'he' ? 'right' : 'left',
+                                    direction: language === 'he' ? 'rtl' : 'ltr',}}
                         >
                             <option value="">{LABELS.Select_Book}</option>
                             {borrowedBooks.map((book) => (

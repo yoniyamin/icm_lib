@@ -30,12 +30,31 @@ function App() {
     );
 }
 
-function AppContent({onLogout}) {
+// eslint-disable-next-line react/prop-types
+function AppContent({ onLogout }) {
     const { language } = useLanguage();
     const LABELS = getFieldLabels(language);
 
+    // Determine if the layout should be reversed (Hebrew should be RTL)
+    const isRTL = language === "he";
+
+    // Define tabs order dynamically
+    const tabs = isRTL
+        ? [
+            { value: "reports", icon: <BarChart className="w-4 h-4 mr-2" />, label: LABELS.reports },
+            { value: "members", icon: <Users className="w-4 h-4 mr-2" />, label: LABELS.members },
+            { value: "loans", icon: <QrCode className="w-4 h-4 mr-2" />, label: LABELS.loans },
+            { value: "inventory", icon: <BookOpen className="w-4 h-4 mr-2" />, label: LABELS.books }
+        ]
+        : [
+            { value: "inventory", icon: <BookOpen className="w-4 h-4 mr-2" />, label: LABELS.books },
+            { value: "loans", icon: <QrCode className="w-4 h-4 mr-2" />, label: LABELS.loans },
+            { value: "members", icon: <Users className="w-4 h-4 mr-2" />, label: LABELS.members },
+            { value: "reports", icon: <BarChart className="w-4 h-4 mr-2" />, label: LABELS.reports }
+        ];
+
     return (
-        <div className="app-container min-h-screen bg-blend-screen max-w-md mx-auto">
+        <div className={`app-container min-h-screen bg-blend-screen max-w-md mx-auto ${isRTL ? "rtl" : "ltr"}`}>
             {/* Header with Banner */}
             <header className="bg-white drop-shadow-2xl rounded-full">
                 <div className="banner-container">
@@ -53,54 +72,45 @@ function AppContent({onLogout}) {
             {/* Main Content with Tabs */}
             <div className="max-w-md mx-auto">
                 <Tabs defaultValue="inventory" className="tabs-content">
-                    <TabsList className="tabs-list w-full shadow-md rounded-lg grid grid-cols-4">
-                        <TabsTrigger
-                            value="inventory"
-                            className="tab-item flex items-center justify-center data-[state=active]:bg-teal-500 data-[state=active]:text-white text-gray-800 py-2 rounded-t-lg hover:bg-gray-100"
-                        >
-                            <BookOpen className="w-4 h-4 mr-2"/>
-                            {LABELS.books}
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="members"
-                            className="tab-item flex items-center justify-center data-[state=active]:bg-[#FDB813] data-[state=active]:text-white text-gray-800 py-2 rounded-t-lg hover:bg-gray-100"
-                        >
-                            <Users className="w-4 h-4 mr-2"/>
-                            {LABELS.members}
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="loans"
-                            className="tab-item flex items-center justify-center data-[state=active]:bg-red-500 data-[state=active]:text-white text-gray-800 py-2 rounded-t-lg hover:bg-gray-100"
-                        >
-                            <QrCode className="w-4 h-4 mr-2"/>
-                            {LABELS.loans}
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="reports"
-                            className="tab-item flex items-center justify-center data-[state=active]:bg-purple-500 data-[state=active]:text-white text-gray-800 py-2 rounded-t-lg hover:bg-gray-100"
-                        >
-                            <BarChart className="w-4 h-4 mr-2"/>
-                            {LABELS.reports}
-                        </TabsTrigger>
+                    <TabsList className={`tabs-list w-full shadow-md rounded-lg grid grid-cols-4`}>
+                        {tabs.map((tab) => (
+                            <TabsTrigger
+                                key={tab.value}
+                                value={tab.value}
+                                className={`tab-item 
+                                    flex items-center justify-center 
+                                    text-gray-800 py-2 rounded-t-lg hover:bg-gray-100 
+                                    data-[state=active]:text-white
+                                    ${tab.value === "inventory" ? "data-[state=active]:bg-teal-500" : ""}
+                                    ${tab.value === "loans" ? "data-[state=active]:bg-red-500" : ""}
+                                    ${tab.value === "members" ? "data-[state=active]:bg-[#FDB813]" : ""}
+                                    ${tab.value === "reports" ? "data-[state=active]:bg-purple-500" : ""}`}
+                            >
+                                {tab.icon}
+                                {tab.label}
+                            </TabsTrigger>
+                        ))}
                     </TabsList>
-                    <div style={{height: '15px'}}></div>
+                    <div style={{ height: '15px' }}></div>
 
                     <TabsContent value="inventory">
-                        <Inventory/>
-                    </TabsContent>
-                    <TabsContent value="members">
-                        <Members/>
+                        <Inventory />
                     </TabsContent>
                     <TabsContent value="loans">
-                        <Loans/>
+                        <Loans />
+                    </TabsContent>
+                    <TabsContent value="members">
+                        <Members />
                     </TabsContent>
                     <TabsContent value="reports">
-                        <Reports/>
+                        <Reports />
                     </TabsContent>
                 </Tabs>
             </div>
         </div>
     );
 }
+
+
 
 export default App;

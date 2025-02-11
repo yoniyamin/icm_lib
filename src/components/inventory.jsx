@@ -85,7 +85,7 @@ const Inventory = () => {
                 year_of_publication: year,
                 pages,
                 cover_type: coverType,
-                book_condition: bookCondition,
+                book_condition: bookCondition || 'טוב - בלאי קל',
                 recommended_age: recommendedAge,
                 loan_status: loanStatus,
                 delivering_parent: deliveringParent
@@ -152,24 +152,19 @@ const Inventory = () => {
                 {language === 'en' ? 'HE' : 'EN'}
             </button>
             {/* Search and Sort Section */}
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col mb-4">
+                {/* Sorting Button at the Top */}
+
+
+                {/* Search Box (Align Right for Hebrew) */}
                 <input
                     id="search_by_name"
                     type="text"
                     placeholder={LABELS.search_books_placeholder}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-1 mr-4 border border-gray-300 rounded-md py-1.5 px-4"
+                    className={`flex-1 border border-gray-300 rounded-md py-1.5 px-4 ${language === 'he' ? 'text-right' : 'text-left'}`}
                 />
-                <div className="sorting-container">
-                    <button
-                        onClick={() => setOrderBy(orderBy === "desc" ? "asc" : "desc")}
-                        className="p-2 border rounded bg-gray-100 hover:bg-gray-200 transition"
-                        aria-label={LABELS.sort_by}
-                    >
-                        {orderBy === "desc" ? <ChevronDown size={20}/> : <ChevronUp size={20}/>}
-                    </button>
-                </div>
             </div>
 
             {/* Add Book Button */}
@@ -265,6 +260,17 @@ const Inventory = () => {
 
                 </form>
             )}
+            {/* Sorting Button as a Full-Width Table Header */}
+            {/* Clickable Sorting Row with Dynamic Direction */}
+            <div
+                className={`w-full border-b border-gray-300 bg-gray-100 py-2 px-4 flex ${language === 'he' ? 'flex-row-reverse' : 'flex-row'} justify-between items-center cursor-pointer`}
+                onClick={() => setOrderBy(orderBy === "desc" ? "asc" : "desc")}
+                aria-label={LABELS.sort_by}
+            >
+                <span className="font-semibold text-gray-700">{LABELS.title}</span>
+                {orderBy === "desc" ? <ChevronDown size={20}/> : <ChevronUp size={20}/>}
+            </div>
+
 
             {/* Book List */}
             <div dir={direction}>
@@ -330,7 +336,8 @@ const Inventory = () => {
 
                                 {/* Expanded details */}
                                 {expandedBooks[book.qr_code] && (
-                                    <div className="mt-8 mb-8 text-gray-600 bg-white p-4 rounded-md border border-gray-100">
+                                    <div
+                                        className="mt-8 mb-8 text-gray-600 bg-white p-4 rounded-md border border-gray-100">
                                         <p><strong>{LABELS.description}:</strong> {book.description || 'N/A'}</p>
                                         <p>
                                             <strong>{LABELS.year_of_publication}:</strong> {book.year_of_publication || 'N/A'}
@@ -353,8 +360,8 @@ const Inventory = () => {
                         ))}
                 </div>
             </div>
-            </div>
-            );
-            };
+        </div>
+    );
+};
 
-            export default Inventory;
+export default Inventory;

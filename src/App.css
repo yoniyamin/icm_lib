@@ -273,10 +273,90 @@ select {
   }
 }
 
+/* RTL & LTR support */
 .rtl {
   direction: rtl;
   text-align: right;
 }
+
+.ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Ensure the tabs list reverses properly */
+.rtl-tabs {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.ltr-tabs {
+  display: flex;
+  flex-direction: row;
+}
+
+/* Align search box to the right when Hebrew */
+input#search_by_name {
+  text-align: left;
+}
+
+.rtl input#search_by_name {
+  text-align: right;
+}
+
+/* Ensure all search/select boxes align correctly */
+.rtl .borrower-select__control,
+.rtl .book-select__control {
+  text-align: right;
+  direction: rtl;
+}
+
+.ltr .borrower-select__control,
+.ltr .book-select__control {
+  text-align: left;
+  direction: ltr;
+}
+
+/* Align search input dynamically */
+.rtl .input {
+  text-align: right;
+  direction: rtl;
+}
+
+.ltr .input {
+  text-align: left;
+  direction: ltr;
+}
+
+/* Table-style header for sorting */
+.sorting-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background-color: #f3f3f3;
+  padding: 8px 16px;
+  border-bottom: 2px solid #ccc;
+  font-weight: bold;
+}
+
+/* Tab item styling */
+.tab-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.tab-item:hover {
+  background-color: #f0f0f0;
+}
+
 
 /* RTL-specific fixes for loan-history-card */
 .loan-history-card.rtl {

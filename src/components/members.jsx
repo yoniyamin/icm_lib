@@ -180,7 +180,7 @@ function Members() {
                 placeholder={LABELS.search_placeholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="input w-full border border-gray-300 rounded-md py-2 px-4 mb-4"
+                className={`input w-full border border-gray-300 rounded-md py-2 px-4 mb-4 ${language === 'he' ? 'text-right' : 'text-left'} ${language === 'he' ? 'rtl' : 'ltr'}`}
             />
 
             {/* Member List */}

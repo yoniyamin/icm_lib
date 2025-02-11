@@ -342,21 +342,47 @@ input#search_by_name {
 
 /* Tab item styling */
 .tab-item {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
-.tab-item:hover {
-  background-color: #f0f0f0;
+/* Ensure active state maintains color on mobile */
+.tab-item[data-state="active"] {
+  -webkit-tap-highlight-color: transparent;
 }
 
+/* Specific active state colors with !important to maintain color during tap */
+.tab-item[data-state="active"][value="inventory"] {
+  background-color: #14b8a6 !important;
+  color: white !important;
+}
+
+.tab-item[data-state="active"][value="loans"] {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+.tab-item[data-state="active"][value="members"] {
+  background-color: #FDB813 !important;
+  color: white !important;
+}
+
+.tab-item[data-state="active"][value="reports"] {
+  background-color: #a855f7 !important;
+  color: white !important;
+}
+
+/* Add touch device optimizations */
+@media (hover: none) {
+  .tab-item:active {
+    background-color: transparent;
+  }
+
+  .tab-item:focus {
+    outline: none;
+  }
+}
 
 /* RTL-specific fixes for loan-history-card */
 .loan-history-card.rtl {

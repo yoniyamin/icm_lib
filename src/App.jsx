@@ -78,13 +78,12 @@ function AppContent({ onLogout }) {
                                 key={tab.value}
                                 value={tab.value}
                                 className={`tab-item 
-                                    flex items-center justify-center 
-                                    text-gray-800 py-2 rounded-t-lg hover:bg-gray-100 
-                                    data-[state=active]:text-white
-                                    ${tab.value === "inventory" ? "data-[state=active]:bg-teal-500" : ""}
-                                    ${tab.value === "loans" ? "data-[state=active]:bg-red-500" : ""}
-                                    ${tab.value === "members" ? "data-[state=active]:bg-[#FDB813]" : ""}
-                                    ${tab.value === "reports" ? "data-[state=active]:bg-purple-500" : ""}`}
+                                flex items-center justify-center 
+                                text-gray-800 py-2 rounded-t-lg hover:bg-gray-100 
+                                ${tab.value === "inventory" && "data-[state=active]:bg-teal-500 data-[state=active]:!text-white"}
+                                ${tab.value === "loans" && "data-[state=active]:bg-red-500 data-[state=active]:!text-white"}
+                                ${tab.value === "members" && "data-[state=active]:bg-[#FDB813] data-[state=active]:!text-white"}
+                                ${tab.value === "reports" && "data-[state=active]:bg-purple-500 data-[state=active]:!text-white"}`}
                             >
                                 {tab.icon}
                                 {tab.label}

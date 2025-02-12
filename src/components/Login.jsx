@@ -31,26 +31,31 @@ const Login = ({ onLogin }) => {
     };
 
     return (
-        <div className="min-h-screen relative flex items-center justify-center">
-            {/* Language Toggle Button */}
-            <button
-                className="w-12 h-12 flex items-center justify-center rounded-full border border-teal-500 bg-white text-teal-500 shadow-md absolute top-2 left-2"
-                onClick={toggleLanguage}
-            >
-                {language === 'en' ? 'HE' : 'EN'}
-            </button>
-
-            {/* Background Image */}
+        <div className={`min-h-screen relative flex items-center justify-center ${direction === 'rtl' ? 'rtl' : 'ltr'}`}>
+            {/* Background Image - Lower z-index */}
             <div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
                 style={{
                     backgroundImage: `url(${BookshelfImage})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
+                    zIndex: 0
                 }}
             />
 
-            {/* Login Form Container */}
+            {/* Language Toggle Button - Higher z-index, fixed to left side */}
+            <button
+                className="w-10 h-10 flex items-center justify-center rounded-full border border-teal-500 bg-white/40 text-teal-500 shadow-md absolute top-2 left-2"
+                onClick={() => {
+                    toggleLanguage();
+                    document.documentElement.dir = direction === 'rtl' ? 'ltr' : 'rtl';
+                }}
+                style={{ zIndex: 50 }}
+            >
+                {language === 'en' ? 'HE' : 'EN'}
+            </button>
+
+            {/* Login Form Container - Middle z-index */}
             <div className="relative z-10 w-full max-w-[320px] sm:max-w-[380px] mx-4 rounded-3xl overflow-hidden shadow-xl">
                 {/* Banner Container */}
                 <div className="bg-white rounded-3xl p-4">
@@ -62,7 +67,7 @@ const Login = ({ onLogin }) => {
                 </div>
 
                 {/* Login Form */}
-                <div dir={direction}>
+                <div className="transition-all duration-300">
                     <form
                         onSubmit={handleSubmit}
                         className="backdrop-blur-sm bg-white/20 p-6 sm:p-8 rounded-3xl"
@@ -90,6 +95,7 @@ const Login = ({ onLogin }) => {
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     placeholder={LABELS.username_placeholder}
+                                    dir={direction === 'rtl' ? 'rtl' : 'ltr'}
                                 />
                             </div>
 
@@ -105,6 +111,7 @@ const Login = ({ onLogin }) => {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder={LABELS.password_placeholder}
+                                    dir={direction === 'rtl' ? 'rtl' : 'ltr'}
                                 />
                             </div>
 

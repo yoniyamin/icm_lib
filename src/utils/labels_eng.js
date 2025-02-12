@@ -144,4 +144,11 @@ export const FIELD_LABELS = {
     logging_in: "Logging in...",
     invalid_credentials: "Invalid username or password.",
 
+    qr_codes_report: "Print QR Codes",
+    qr_codes_available: "There are {count} QR codes available.",
+    qr_codes_description: "This report generates a printable PDF of QR codes arranged in a grid with cutting guides.",
+    start_qr: "From QR ID",
+    end_qr: "End QR ID",
+    end_qr_exceed_error: "End QR ID cannot exceed {qrCount}.",
+    from_qr_greater_error: "From QR ID cannot be greater than To QR ID.",
 };

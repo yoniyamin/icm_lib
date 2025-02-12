@@ -144,4 +144,12 @@ export const FIELD_LABELS = {
     login_button: "כניסה",
     logging_in: "מתחבר...",
     invalid_credentials: "שם משתמש או סיסמה לא נכונים.",
+
+    qr_codes_report: "הדפס קודי QR",
+    qr_codes_available: "ישנם {count} קודי QR זמינים.",
+    qr_codes_description: "דוח זה יפיק קובץ PDF להדפסה של קודי QR המסודרים ברשת עם קווים לחיתוך.",
+    start_qr: "ממזהה QR",
+    end_qr: "עד מזהה QR",
+    end_qr_exceed_error: "מספר ה-QR הסופי לא יכול להיות גדול מ-{qrCount}.",
+    from_qr_greater_error: "מספר ה-QR ההתחלתי לא יכול להיות גדול ממספר ה-QR הסופי.",
 };

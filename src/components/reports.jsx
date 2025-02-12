@@ -162,18 +162,25 @@ const ReportGenerationTab = () => {
                         {reportType && (
                             <div className="space-y-3">
                                 <h3 className="text-md font-semibold text-teal-600 mb-3 flex items-center">
-                                    <Filter className={`w-4 h-4 ${language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                                    <Filter className={`w-4 h-4 ${language === 'he' ? 'ml-2' : 'mr-2'}`}/>
                                     {LABELS['report_options']}
                                 </h3>
 
+                                <p className={`text-sm text-gray-600 ${language === 'he' ? 'text-right' : 'text-left'}`}>
+                                    {reportType === 'inventory'
+                                        ? (LABELS['inventory_report_description'] ||
+                                            'This report generates an Excel file with current inventory details. You can sort the data by various fields and choose to include borrowed items.')
+                                        : reportType === 'loans'
+                                            ? (LABELS['loans_report_description'] ||
+                                                'This report generates an Excel file of active loans. You can choose to include historical loans and sort by various fields.')
+                                            : (LABELS['qr_codes_description'] ||
+                                                'This report generates a printable PDF of QR codes arranged in a grid with cutting guides.')}
+                                </p>
+
                                 {reportType === 'qr_codes' ? (
                                     <div className="space-y-3">
-                                        <p className={`text-sm text-gray-600 ${language === 'he' ? 'text-right' : 'text-left'}`}>
-                                            {LABELS['qr_codes_description'] ||
-                                                'This report generates a printable PDF of QR codes arranged in a grid with cutting guides.'}
-                                        </p>
                                         {qrCount !== null && (
-                                            <p className={`text-xs text-gray-800 ${language === 'he' ? 'text-right' : 'text-left'}`}>
+                                            <p className={`text-sm text-purple-600 ${language === 'he' ? 'text-right' : 'text-left'}`}>
                                                 {LABELS['qr_codes_available']
                                                     ? LABELS['qr_codes_available'].replace('{count}', qrCount)
                                                     : `There are ${qrCount} QR codes available.`}
@@ -195,7 +202,7 @@ const ReportGenerationTab = () => {
                                                             setStartQr("1");
                                                         }
                                                     }}
-                                                    className="border border-gray-600 rounded-md p-1 text-sm w-full"
+                                                    className="border rounded-md p-1 w-full"
                                                 />
                                             </div>
                                             <div className="flex flex-col flex-1">
@@ -216,7 +223,7 @@ const ReportGenerationTab = () => {
                                                             setEndQr(String(qrCount));
                                                         }
                                                     }}
-                                                    className="border border-gray-600 rounded-md p-1 text-sm w-full"
+                                                    className="border rounded-md p-1 w-full"
                                                 />
                                             </div>
                                         </div>
@@ -237,7 +244,7 @@ const ReportGenerationTab = () => {
                                 ) : (
                                     // For loans and inventory, show toggles, sort, and order options.
                                     <div className="grid grid-cols-2 gap-2">
-                                    {reportType === 'loans' && (
+                                        {reportType === 'loans' && (
                                             <div className="flex items-center col-span-2">
                                                 <div className="flex items-center space-x-2">
                                                     <button
@@ -256,7 +263,8 @@ const ReportGenerationTab = () => {
                                 }`}
                             />
                                                     </button>
-                                                    <span className="text-sm text-gray-600">{LABELS.include_history}</span>
+                                                    <span
+                                                        className="text-sm text-gray-600">{LABELS.include_history}</span>
                                                 </div>
                                             </div>
                                         )}
@@ -280,7 +288,8 @@ const ReportGenerationTab = () => {
                                 }`}
                             />
                                                     </button>
-                                                    <span className="text-sm text-gray-600">{LABELS.include_borrowed}</span>
+                                                    <span
+                                                        className="text-sm text-gray-600">{LABELS.include_borrowed}</span>
                                                 </div>
                                             </div>
                                         )}
@@ -323,7 +332,7 @@ const ReportGenerationTab = () => {
                                     }`}
                                 >
                                     {LABELS.generate_report_button}{' '}
-                                    <Download className={`w-4 h-4 ${language === 'he' ? 'ml-2' : 'mr-2'}`} />
+                                    <Download className={`w-4 h-4 ${language === 'he' ? 'ml-2' : 'mr-2'}`}/>
                                 </button>
                             </div>
                         )}

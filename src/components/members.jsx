@@ -16,7 +16,6 @@ function Members() {
     const { language, toggleLanguage, direction } = useLanguage();
     const LABELS = getFieldLabels(language);
     const [editingMemberId, setEditingMemberId] = useState(null);
-    const [setExpandedMembers] = useState({});
     const [expandedMemberId, setExpandedMemberId] = useState(null);
     const [memberLoans, setMemberLoans] = useState({});
 

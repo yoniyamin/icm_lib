@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { addMemberService, fetchMembers, updateMemberService, deleteMemberService } from "../services/services";
+import { addMemberService, fetchMembers, fetchMemberLoans, updateMemberService, deleteMemberService } from "../services/services";
 import { useLanguage } from '../context/LanguageContext';
 import { getFieldLabels } from '../utils/labels';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Info } from 'lucide-react';
 
 function Members() {
     const [members, setMembers] = useState([]); // Ensure it's initialized as an array
@@ -17,6 +17,10 @@ function Members() {
     const LABELS = getFieldLabels(language);
     const [editingMemberId, setEditingMemberId] = useState(null);
     const [setExpandedMembers] = useState({});
+    const [expandedMemberId, setExpandedMemberId] = useState(null);
+    const [memberLoans, setMemberLoans] = useState({});
+
+
 
     const validateForm = () => {
         const newErrors = {};
@@ -82,12 +86,6 @@ function Members() {
         setShowAddMember(true);
     };
 
-    const toggleExpand = (memberId) => {
-        setExpandedMembers(prev => ({
-            ...prev,
-            [memberId]: !prev[memberId]
-        }));
-    };
 
     // Fetch members from the backend
     const loadMembers = async () => {
@@ -108,6 +106,22 @@ function Members() {
     useEffect(() => {
         loadMembers();
     }, []);
+
+    const toggleMemberDetails = async (memberId) => {
+        if (expandedMemberId === memberId) {
+            setExpandedMemberId(null);
+        } else {
+            setExpandedMemberId(memberId);
+            if (!memberLoans[memberId]) {
+                try {
+                    const loans = await fetchMemberLoans(memberId);
+                    setMemberLoans(prev => ({ ...prev, [memberId]: loans }));
+                } catch (error) {
+                    console.error("Error fetching loans:", error);
+                }
+            }
+        }
+    };
 
     // Filter members based on the search term
     const filteredMembers = Array.isArray(members)
@@ -191,29 +205,67 @@ function Members() {
                             <div className="mb-4">
                                 <h2 className="font-bold text-gray-800">{LABELS.parent_name_label}: {member.parent_name}</h2>
                                 <p className="text-sm text-gray-500">{LABELS.kid_name_label}: {member.kid_name}</p>
-                                <p className="text-sm mb-8 text-gray-500">{LABELS.email_label}: {member.email || LABELS.no_email_provided}</p>
+                                <p className="text-sm mb-2 text-gray-500">{LABELS.email_label}: {member.email || LABELS.no_email_provided}</p>
+                                <p className="text-sm mb-8 text-gray-700 font-semibold">{LABELS.borrowed_books_label}: {member.borrowed_books_count}</p>
+
+                                {expandedMemberId === member.id && memberLoans[member.id] && (
+                                    <div className="mt-2 p-2 bg-gray-100 rounded">
+                                        <h3 className="font-semibold text-gray-700">{LABELS.borrowed_books_label}</h3>
+                                        <ul>
+                                            {memberLoans[member.id].map((loan, index) => (
+                                                <li key={index} className="text-sm text-gray-600">
+                                                    {loan.book_title} ({LABELS.borrow_date}: {loan.borrowed_at})
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Controls */}
                             <div className="absolute bottom-4 inset-x-4 flex justify-between items-center">
                                 <div className="flex gap-2">
-                                    <button
-                                        onClick={() => handleDeleteMember(member.id)}
-                                        className="text-gray-600 hover:text-red-600 transition-colors duration-200"
-                                        aria-label={LABELS.delete_member}
-                                    >
-                                        <Trash2 size={20}/>
-                                    </button>
+                                    {member.borrowed_books_count > 0 ? (
+                                        <button
+                                            onClick={() => alert(LABELS.cannot_delete_with_borrowed_books)}
+                                            className="text-gray-400 cursor-not-allowed relative"
+                                            aria-label={LABELS.cannot_delete_with_borrowed_books}
+                                        >
+                                            <Trash2 size={20}/>
+                                            {/* Add diagonal line over the trash icon */}
+                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                <div className="w-[28px] h-[2px] bg-gray-400 rotate-45 absolute"></div>
+                                            </div>
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleDeleteMember(member.id)}
+                                            className="text-gray-600 hover:text-red-600 transition-colors duration-200"
+                                            aria-label={LABELS.delete_member}
+                                        >
+                                            <Trash2 size={20}/>
+                                        </button>
+                                    )}
 
                                     <button
                                         onClick={() => handleEditMember(member)}
-                                        className="p-2 text-gray-600 hover:text-emerald-600 transition-colors duration-200"
+                                        className="text-gray-600 hover:text-emerald-600 transition-colors duration-200"
                                         aria-label={LABELS.edit_member}
                                     >
                                         <Edit size={20}/>
                                     </button>
-                                </div>
 
+                                    {/* Only show the info button if there are borrowed books */}
+                                    {member.borrowed_books_count > 0 && (
+                                        <button
+                                            onClick={() => toggleMemberDetails(member.id)}
+                                            className="text-gray-600 hover:text-blue-600 transition-colors duration-200"
+                                            aria-label={LABELS.More_Details}
+                                        >
+                                            <Info size={20}/>
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))}

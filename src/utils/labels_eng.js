@@ -55,6 +55,7 @@ export const FIELD_LABELS = {
     members_list_title: 'Library Members',
     no_members_found: 'No members found',
     select_all: 'Select All',
+    borrowed_books_label: 'Borrowed books',
 
     // Form Placeholders and Labels
     parent_name_placeholder: 'Parent\'s Name',
@@ -119,6 +120,8 @@ export const FIELD_LABELS = {
     error_book_description_required: 'Description is required.',
     error_book_year_required: 'Year of publication is required.',
     error_book_pages_required: 'Number of pages is required.',
+    cannot_delete_with_borrowed_books: "Cannot delete a member with borrowed books",
+
 
     // Report labels
     inventory_report: 'Inventory Report',

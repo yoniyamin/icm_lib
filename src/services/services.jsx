@@ -15,9 +15,22 @@ export const addMemberService = async (formData) => {
 export const fetchMembers = async () => {
     try {
         const response = await axiosInstance.get(`/api/members`);
-        return response.data;
+        return response.data.map(member => ({
+            ...member,
+            borrowed_books_count: member.borrowed_books_count || 0
+        }));
     } catch (error) {
         console.error("Error fetching members:", error);
+        throw error;
+    }
+};
+
+export const fetchMemberLoans = async (memberId) => {
+    try {
+        const response = await axiosInstance.get(`/api/members/${memberId}/loans`);
+        return response.data.loans;
+    } catch (error) {
+        console.error(`Error fetching loans for member ${memberId}:`, error);
         throw error;
     }
 };
@@ -41,6 +54,7 @@ export const deleteMemberService = async (id) => {
         throw error;
     }
 };
+
 
 export const fetchBooks = async (orderBy = 'desc') => {
     try {

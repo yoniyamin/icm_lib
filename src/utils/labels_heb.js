@@ -55,6 +55,7 @@ export const FIELD_LABELS = {
     members_list_title: 'חברי הספרייה',
     no_members_found: 'לא נמצאו חברים',
     select_all: 'בחר הכל',
+    borrowed_books_label: 'ספרים מושאלים',
 
     // Form Placeholders and Labels
     parent_name_placeholder: 'שם ההורה המשאיל',
@@ -120,6 +121,8 @@ export const FIELD_LABELS = {
     error_book_year_required: 'נדרשת שנת הוצאה.',
     error_book_pages_required: 'נדרש מספר עמודים.',
     confirm_delete_member: 'האם אתה בטוח שברצונך למחוק חבר זה?',
+    cannot_delete_with_borrowed_books: "לא ניתן למחוק חבר עם השאלות פתוחות",
+
 
     // Reports labels
     inventory_report: 'דוח מלאי',

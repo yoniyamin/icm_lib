@@ -122,13 +122,23 @@ function Members() {
         }
     };
 
-    // Filter members based on the search term
+    // Step 1: Filter members based on the search term
     const filteredMembers = Array.isArray(members)
         ? members.filter((member) =>
             member.parent_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             member.kid_name.toLowerCase().includes(searchTerm.toLowerCase())
         )
         : [];
+
+    // Step 2: Sort members so those who borrowed more than 2 books appear first
+    const sortedMembers = [...filteredMembers].sort((a, b) => {
+        const aBooks = a.borrowed_books_count || 0;
+        const bBooks = b.borrowed_books_count || 0;
+
+        if (aBooks > 2 && bBooks <= 2) return -1; // Move 'a' to the top
+        if (bBooks > 2 && aBooks <= 2) return 1;  // Move 'b' to the top
+        return 0;
+    });
 
     return (
         <div className="w-full max-w-md mx-auto">
@@ -199,13 +209,13 @@ function Members() {
             {/* Member List */}
             <div dir={direction}>
                 <div className="overflow-y-auto max-h-96 border-t pt-4">
-                    {filteredMembers.map((member) => (
+                    {sortedMembers.map((member) => (
                         <div key={member.id} className="bg-gray-50 shadow-sm rounded-lg p-4 mb-2 relative">
                             <div className="mb-4">
                                 <h2 className="font-bold text-gray-800">{LABELS.parent_name_label}: {member.parent_name}</h2>
                                 <p className="text-sm text-gray-500">{LABELS.kid_name_label}: {member.kid_name}</p>
-                                <p className="text-sm mb-2 text-gray-500">{LABELS.email_label}: {member.email || LABELS.no_email_provided}</p>
-                                <p className="text-sm mb-8 text-gray-700 font-semibold">{LABELS.borrowed_books_label}: {member.borrowed_books_count}</p>
+                                <p className="text-sm mb-2  text-gray-500">{LABELS.email_label}: {member.email || LABELS.no_email_provided}</p>
+                                <p className={`text-sm mb-2 mt-2 font-semibold ${member.borrowed_books_count > 2 ? "text-red-500" : "text-gray-700"}`}>{LABELS.borrowed_books_label}: {member.borrowed_books_count}</p>
 
                                 {expandedMemberId === member.id && memberLoans[member.id] && (
                                     <div className="mt-2 p-2 bg-gray-100 rounded">
@@ -213,7 +223,7 @@ function Members() {
                                         <ul>
                                             {memberLoans[member.id].map((loan, index) => (
                                                 <li key={index} className="text-sm text-gray-600">
-                                                    {loan.book_title} ({LABELS.borrow_date}: {loan.borrowed_at})
+                                                    - {loan.book_title} ({LABELS.borrow_date}: {new Date(loan.borrowed_at).toLocaleDateString()})
                                                 </li>
                                             ))}
                                         </ul>

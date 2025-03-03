@@ -147,6 +147,21 @@ export const FIELD_LABELS = {
     logging_in: "Logging in...",
     invalid_credentials: "Invalid username or password.",
 
+    // Database management
+    database_management: "Database Management",
+    backup_database: "Backup Database",
+    backup_description: 'Create a backup of the current database. This will download a zip file containing the database and its associated files.',
+    creating_backup: 'Creating backup...',
+    download_backup: 'Download Database Backup',
+    restore_database: 'Restore Database',
+    restore_description: 'Restore the database from a previously created backup file (.zip or .db).',
+    restore_warning: 'Warning: This will overwrite the current database.',
+    select_backup_file: 'Select Backup file',
+    accepted_file_types: 'Accepted file types: .zip, .db',
+    restoring_database: 'Restoring database...',
+    restore_database_button: 'Restore Database',
+    restore_blocked_message: "Restore is currently blocked.",
+
     qr_codes_report: "Print QR Codes",
     qr_codes_available: "There are {count} QR codes available.",
     qr_codes_description: "This report generates a printable PDF of QR codes arranged in a grid with cutting guides.",
@@ -156,4 +171,19 @@ export const FIELD_LABELS = {
     end_qr: "End QR ID",
     end_qr_exceed_error: "End QR ID cannot exceed {qrCount}.",
     from_qr_greater_error: "From QR ID cannot be greater than To QR ID.",
+
+    // QR Code Scanner Labels
+    qr_scan_failed: "Scan Failed",
+    qr_select_image: "Select an image",
+    qr_error_no_code: "No QR code detected. Please try again with a clearer image.",
+    qr_error_no_support: "Your browser doesn't support QR scanning. Try another browser.",
+    qr_error_timeout: "Scanning timed out. Try using a smaller image.",
+    qr_error_unreadable: "The QR code is unclear or damaged. Try a different image.",
+    qr_error_tips: "Try using a well-lit image with the entire QR code visible and in focus",
+    qr_error_large_file: "The image file is too large. Please use a smaller image.",
+    qr_error_generic: "Couldn't scan the QR code",
+    qr_try_again: "Try Again",
+    qr_cancel: "Cancel",
+    processing_image: "Processing Image...",
+    error_scanning: "Scanning of the QR code failed",
 };

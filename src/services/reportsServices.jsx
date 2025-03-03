@@ -77,3 +77,32 @@ export const fetchQrCodes = async () => {
         throw error;
     }
 };
+
+export const backupDatabase = async () => {
+    try {
+        const response = await axiosInstance.get('/api/database/backup', {
+            responseType: 'blob', // Receive binary data
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error backing up database:', error);
+        throw error;
+    }
+};
+
+export const restoreDatabase = async (backupFile) => {
+    try {
+        const formData = new FormData();
+        formData.append('backup_file', backupFile);
+
+        const response = await axiosInstance.post('/api/database/restore', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error restoring database:', error);
+        throw error;
+    }
+};

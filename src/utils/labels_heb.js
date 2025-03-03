@@ -148,6 +148,21 @@ export const FIELD_LABELS = {
     logging_in: "מתחבר...",
     invalid_credentials: "שם משתמש או סיסמה לא נכונים.",
 
+    // Database management
+    database_management: "ניהול מסד נתונים",
+    backup_database: "גיבוי מסד נתונים",
+    backup_description: 'יצירת גיבוי של מסד הנתונים הנוכחי. פעולה זו תוריד קובץ zip המכיל את מסד הנתונים והקבצים הקשורים אליו.',
+    creating_backup: 'יוצר גיבוי...',
+    download_backup: 'הורדת גיבוי מסד נתונים',
+    restore_database: 'שחזור מסד נתונים',
+    restore_description: 'שחזור מסד הנתונים מקובץ גיבוי שנוצר בעבר (.zip או .db).',
+    restore_warning: 'אזהרה: פעולה זו תדרוס את מסד הנתונים הנוכחי.',
+    select_backup_file: 'בחר קובץ גיבוי',
+    accepted_file_types: 'סוגי קבצים מקובלים: .zip, .db',
+    restoring_database: 'משחזר מסד נתונים...',
+    restore_database_button: 'שחזור מסד נתונים',
+    restore_blocked_message: "שחזור מסד הנתונים חסום כרגע.",
+
     qr_codes_report: "הדפס קודי QR",
     qr_codes_available: "ישנם {count} קודי QR זמינים.",
     qr_codes_description: "דוח זה יפיק קובץ PDF להדפסה של קודי QR המסודרים ברשת עם קווים לחיתוך.",
@@ -157,4 +172,19 @@ export const FIELD_LABELS = {
     end_qr: "עד מזהה QR",
     end_qr_exceed_error: "מספר ה-QR הסופי לא יכול להיות גדול מ-{qrCount}.",
     from_qr_greater_error: "מספר ה-QR ההתחלתי לא יכול להיות גדול ממספר ה-QR הסופי.",
+
+    // QR Code Scanner Labels
+    qr_scan_failed: "הסריקה נכשלה",
+    qr_select_image: "בחר תמונה",
+    qr_error_no_code: "לא זוהה קוד QR. נסה שוב עם תמונה ברורה יותר.",
+    qr_error_no_support: "הדפדפן שלך אינו תומך בסריקת QR. נסה דפדפן אחר.",
+    qr_error_timeout: "הסריקה נמשכה יותר מדי זמן. נסה להשתמש בתמונה קטנה יותר.",
+    qr_error_unreadable: "קוד ה-QR אינו קריא או פגום. נסה תמונה אחרת.",
+    qr_error_tips: "נסה להשתמש בתמונה מוארת היטב עם כל קוד ה-QR גלוי וממוקד",
+    qr_error_large_file: "קובץ התמונה גדול מדי. השתמש בתמונה קטנה יותר.",
+    qr_error_generic: "לא ניתן לסרוק את קוד ה-QR",
+    qr_try_again: "נסה שוב",
+    qr_cancel: "ביטול",
+    processing_image: "מעבד תמונה...",
+    error_scanning: "סריקת הקוד נכשלה",
 };

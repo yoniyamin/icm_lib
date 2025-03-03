@@ -476,3 +476,8 @@ input#search_by_name {
   color: red;
   font-weight: bold;
 }
+
+.borrowed-books-highlight {
+  color: red;
+  font-weight: bold;
+}

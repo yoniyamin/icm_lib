@@ -4,8 +4,10 @@ import {
     generateInventoryReport,
     generateQrCodesReport,
     fetchQrCodes,
+    backupDatabase,
+    restoreDatabase,
 } from '../services/reportsServices';
-import { BarChart2, FileText, Download, Filter } from 'lucide-react';
+import { BarChart2, FileText, Download, Filter, Database, Upload, TriangleAlert } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { getFieldLabels } from '../utils/labels';
 
@@ -24,6 +26,17 @@ const ReportGenerationTab = () => {
     const [startQr, setStartQr] = useState('');
     const [endQr, setEndQr] = useState('');
     const [qrCount, setQrCount] = useState(null);
+
+    // States for database management
+    const [backupInProgress, setBackupInProgress] = useState(false);
+    const [restoreInProgress, setRestoreInProgress] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [message, setMessage] = useState({ text: '', type: '' }); // type can be 'success', 'error'
+    const [showDatabaseManagement, setShowDatabaseManagement] = useState(false);
+
+    const toggleDatabaseManagement = () => {
+        setShowDatabaseManagement(prevState => !prevState);
+    };
 
     // Options for sorting (only used for inventory and loans reports)
     const sortOptions = {
@@ -106,6 +119,103 @@ const ReportGenerationTab = () => {
         }
     };
 
+    // Handle backup
+    const handleBackup = async () => {
+        try {
+            setBackupInProgress(true);
+            setMessage({ text: '', type: '' });
+
+            const backupBlob = await backupDatabase();
+
+            // Generate a filename with timestamp
+            const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
+            const fileName = `library_backup_${timestamp}.zip`;
+
+            // Create a download link
+            const url = window.URL.createObjectURL(new Blob([backupBlob]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+
+            // Clean up
+            link.parentNode.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            setMessage({
+                text: LABELS['backup_success'] || 'Database backup created successfully!',
+                type: 'success'
+            });
+        } catch (error) {
+            console.error('Backup failed:', error);
+            setMessage({
+                text: LABELS['backup_error'] || 'Failed to create database backup.',
+                type: 'error'
+            });
+        } finally {
+            setBackupInProgress(false);
+        }
+    };
+
+    // Handle file selection for restore
+    const handleFileSelect = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            // Clear any previous messages
+            setMessage({ text: '', type: '' });
+        }
+    };
+
+    // Handle database restore
+    const handleRestore = async () => {
+        if (!selectedFile) {
+            setMessage({
+                text: LABELS['no_file_selected'] || 'Please select a backup file to restore.',
+                type: 'error'
+            });
+            return;
+        }
+
+        // Confirm with user
+        const confirmRestore = window.confirm(
+            LABELS['confirm_restore'] ||
+            'Restoring the database will overwrite the current data. This action cannot be undone. Do you want to continue?'
+        );
+
+        if (!confirmRestore) return;
+
+        try {
+            setRestoreInProgress(true);
+            setMessage({ text: '', type: '' });
+
+            const result = await restoreDatabase(selectedFile);
+
+            setMessage({
+                text: result.message || LABELS['restore_success'] || 'Database restored successfully!',
+                type: 'success'
+            });
+
+            // Clear file selection after successful restore
+            setSelectedFile(null);
+            const fileInput = document.getElementById('restoreFileInput');
+            if (fileInput) fileInput.value = '';
+        } catch (error) {
+            console.error('Restore failed:', error);
+            let errorMessage = LABELS['restore_error'] || 'Failed to restore database.';
+
+            // Check if there's more specific error information
+            if (error.response && error.response.data && error.response.data.error) {
+                errorMessage += ` ${error.response.data.error}`;
+            }
+
+            setMessage({ text: errorMessage, type: 'error' });
+        } finally {
+            setRestoreInProgress(false);
+        }
+    };
+
     return (
         <div
             className={`report-container ${language === 'he' ? 'rtl' : ''}`}
@@ -127,7 +237,7 @@ const ReportGenerationTab = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Report Type Selection */}
-                    <div className="bg-gray-50 p-4 rounded-lg" dir={language === 'he' ? 'rtl' : 'ltr'}>
+                    <div className="bg-gray-50 p-4 rounded-lg border-gray-200 border-1" dir={language === 'he' ? 'rtl' : 'ltr'}>
                         <h3 className="text-md font-semibold text-teal-600 mb-3 flex items-center">
                             <FileText className={`w-4 h-4 ${language === 'he' ? 'ml-2' : 'mr-2'}`} />
                             {LABELS['report_type_title'] || LABELS['select_report_type']}
@@ -155,7 +265,7 @@ const ReportGenerationTab = () => {
 
                     {/* Report Options */}
                     <div
-                        className={`bg-white p-4 rounded-lg border border-gray-100 ${
+                        className={`bg-gray-100 p-4 rounded-lg border border-gray-300 ${
                             !reportType ? 'opacity-50 pointer-events-none' : ''
                         }`}
                     >
@@ -337,6 +447,76 @@ const ReportGenerationTab = () => {
                             </div>
                         )}
                     </div>
+                </div>
+                {/* Database Management Section */}
+                <div className="mt-8">
+                    <div
+                        className="flex items-center justify-between mb-4 cursor-pointer bg-gray-200 p-3 rounded-md hover:bg-gray-300 transition"
+                        onClick={toggleDatabaseManagement}
+                    >
+                        <div className="flex items-center">
+                            <Database className="w-6 h-6 mr-2 text-teal-500"/>
+                            <h2 className="text-xl font-bold text-gray-800">
+                                {LABELS['database_management'] || 'Database Management'}
+                            </h2>
+                        </div>
+                        <span className="text-teal-500">{showDatabaseManagement ? '▲' : '▼'}</span>
+                    </div>
+
+                    {showDatabaseManagement && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            {/* Backup Section */}
+                            <div className="p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-md font-semibold text-teal-600 mb-3 flex items-center">
+                                    <Download className="w-4 h-4 mr-2" />
+                                    {LABELS['backup_database'] || 'Backup Database'}
+                                </h3>
+                                <p className="text-sm text-gray-600 mb-4">
+                                    {LABELS['backup_description'] || 'Create a backup of the database.'}
+                                </p>
+                                <button
+                                    onClick={handleBackup}
+                                    disabled={backupInProgress}
+                                    className="w-full p-2 bg-teal-500 text-white rounded-md flex items-center justify-center"
+                                >
+                                    {backupInProgress ? LABELS.creating_backup : LABELS.download_backup}
+                                    <Download className="w-4 h-4 ml-2" />
+                                </button>
+                            </div>
+
+                            {/* Restore Section */}
+                            <div className="p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-md font-semibold text-teal-600 mb-3 flex items-center">
+                                    <Upload className="w-4 h-4 mr-2" />
+                                    {LABELS['restore_database'] || 'Restore Database'}
+                                </h3>
+                                <p className="text-sm text-gray-600 mb-4">
+                                    {LABELS['restore_description'] || 'Restore the database from a backup file.'}
+                                </p>
+
+                                {/* Warning Message - Restore is Blocked */}
+                                <div className="flex items-center bg-yellow-100 border-l-4 border-yellow-500 p-3 mb-4 rounded-md">
+                                    <TriangleAlert className="w-5 h-5 text-yellow-600 mr-2" />
+                                    <p className="text-yellow-700 text-sm">{LABELS['restore_blocked_message'] || 'Restore is currently blocked.'}</p>
+                                </div>
+
+                                <input
+                                    type="file"
+                                    accept=".zip,.db"
+                                    onChange={handleFileSelect}
+                                    className="border rounded-md p-1 text-sm w-full"
+                                />
+                                <button
+                                    onClick={handleRestore}
+                                    disabled={!selectedFile || restoreInProgress}
+                                    className="w-full p-2 bg-teal-500 text-white rounded-md flex items-center justify-center mt-2"
+                                >
+                                    {restoreInProgress ? LABELS.restoring_database : LABELS.restore_database}
+                                    <Upload className="w-4 h-4 ml-2" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -143,13 +143,6 @@ function Members() {
     return (
         <div className="w-full max-w-md mx-auto">
             <button
-                className="w-10 h-10 flex items-center justify-center rounded-full border border-teal-500 bg-white/50 text-teal-500 shadow-md absolute top-2 left-2"                onClick={toggleLanguage}
-            >
-                {language === 'en' ? 'HE' : 'EN'}
-            </button>
-
-
-            <button
                 onClick={() => setShowAddMember(!showAddMember)}
                 className="w-full bg-blue-500 text-white font-semibold py-2 rounded-md hover:bg-blue-600 transition mb-4"
             >

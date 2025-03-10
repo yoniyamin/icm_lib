@@ -1,27 +1,41 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 
 // Create the LanguageContext
 const LanguageContext = createContext();
 
+// eslint-disable-next-line react/prop-types
 export const LanguageProvider = ({ children }) => {
-    const [language, setLanguage] = useState('he');
+    // Load language from localStorage or default to Hebrew ('he')
+    const [language, setLanguage] = useState(() => {
+        const savedLanguage = localStorage.getItem('language');
+        return savedLanguage || 'he';
+    });
 
-    // Determine text direction based on the language
-    const getDirection = (lang) => (lang === 'he' ? 'rtl' : 'ltr');
+    // Update the <html> tag with the correct direction & language
+    useEffect(() => {
+        document.documentElement.lang = language;
+        document.documentElement.dir = language === 'he' ? 'rtl' : 'ltr';
+        localStorage.setItem('language', language);
+        console.log("Language updated to:", language);
+    }, [language]);
 
-    const toggleLanguage = () => {
-        setLanguage((prevLang) => (prevLang === 'en' ? 'he' : 'en'));
+    // Toggle function - using useCallback to memoize the function
+    const toggleLanguage = useCallback(() => {
+        setLanguage((prevLang) => {
+            const newLang = prevLang === 'en' ? 'he' : 'en';
+            console.log("Toggling language from", prevLang, "to", newLang);
+            return newLang;
+        });
+    }, []);
+
+    const contextValue = {
+        language,
+        toggleLanguage,
+        direction: language === 'he' ? 'rtl' : 'ltr',
     };
 
     return (
-        <LanguageContext.Provider
-            value={{
-                language,
-                setLanguage,
-                toggleLanguage,
-                direction: getDirection(language), // Provide the direction
-            }}
-        >
+        <LanguageContext.Provider value={contextValue}>
             {children}
         </LanguageContext.Provider>
     );

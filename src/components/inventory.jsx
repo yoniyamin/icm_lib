@@ -145,12 +145,6 @@ const Inventory = () => {
 
     return (
         <div className="w-full max-w-md mx-auto">
-            <button
-                className="w-10 h-10 flex items-center justify-center rounded-full border border-teal-500 bg-white/50 text-teal-500 shadow-md absolute top-2 left-2"
-                onClick={toggleLanguage}
-            >
-                {language === 'en' ? 'HE' : 'EN'}
-            </button>
             {/* Search and Sort Section */}
             <div className="flex flex-col mb-4">
                 {/* Sorting Button at the Top */}

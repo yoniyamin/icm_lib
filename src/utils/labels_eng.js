@@ -147,20 +147,12 @@ export const FIELD_LABELS = {
     logging_in: "Logging in...",
     invalid_credentials: "Invalid username or password.",
 
-    // Database management
-    database_management: "Database Management",
-    backup_database: "Backup Database",
-    backup_description: 'Create a backup of the current database. This will download a zip file containing the database and its associated files.',
-    creating_backup: 'Creating backup...',
-    download_backup: 'Download Database Backup',
-    restore_database: 'Restore Database',
-    restore_description: 'Restore the database from a previously created backup file (.zip or .db).',
-    restore_warning: 'Warning: This will overwrite the current database.',
-    select_backup_file: 'Select Backup file',
-    accepted_file_types: 'Accepted file types: .zip, .db',
-    restoring_database: 'Restoring database...',
-    restore_database_button: 'Restore Database',
-    restore_blocked_message: "Restore is currently blocked.",
+    // Context menu
+    system_status: "System Status",
+    database_status: "Database Status",
+    backend_status: "Backend Status",
+    connected: "Connected",
+    disconnected: "Disconnected",
 
     qr_codes_report: "Print QR Codes",
     qr_codes_available: "There are {count} QR codes available.",

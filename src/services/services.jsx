@@ -2,6 +2,42 @@ import axios from "axios";
 import BASE_URL from "../utils/apiConfig";
 import axiosInstance from "./axiosConfig"; //baseURL is provided by the instance.
 
+export const checkNeonDBStatus = async () => {
+    try {
+        const response = await fetch(`${BASE_URL}/api/neon-status`);
+        if (!response.ok) throw new Error("Database unreachable");
+
+        const data = await response.json();
+        return data.status === "operational" ? "operational" : "error"; // Returns "error" if down
+    } catch (error) {
+        console.error("NeonDB health check failed:", error);
+        return "error"; // Return "error" to trigger fallback UI
+    }
+};
+
+export const checkBackendStatus = async () => {
+    try {
+        await axios.get(`${BASE_URL}/api/health`);
+        return true; // Backend is up
+    } catch (error) {
+        return false; // Backend is down
+    }
+};
+
+export const loginService = async (username, password) => {
+    try {
+        const response = await axios.post(`${BASE_URL}/api/login`, {
+            username,
+            password // Send password as is (let backend hash & verify)
+        });
+
+        return response.data; // Return the token
+    } catch (error) {
+        throw new Error("Invalid username or password");
+    }
+};
+
+
 export const addMemberService = async (formData) => {
     try {
         const response = await axiosInstance.post(`/api/members`, formData);

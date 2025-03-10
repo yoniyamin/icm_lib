@@ -148,20 +148,12 @@ export const FIELD_LABELS = {
     logging_in: "מתחבר...",
     invalid_credentials: "שם משתמש או סיסמה לא נכונים.",
 
-    // Database management
-    database_management: "ניהול מסד נתונים",
-    backup_database: "גיבוי מסד נתונים",
-    backup_description: 'יצירת גיבוי של מסד הנתונים הנוכחי. פעולה זו תוריד קובץ zip המכיל את מסד הנתונים והקבצים הקשורים אליו.',
-    creating_backup: 'יוצר גיבוי...',
-    download_backup: 'הורדת גיבוי מסד נתונים',
-    restore_database: 'שחזור מסד נתונים',
-    restore_description: 'שחזור מסד הנתונים מקובץ גיבוי שנוצר בעבר (.zip או .db).',
-    restore_warning: 'אזהרה: פעולה זו תדרוס את מסד הנתונים הנוכחי.',
-    select_backup_file: 'בחר קובץ גיבוי',
-    accepted_file_types: 'סוגי קבצים מקובלים: .zip, .db',
-    restoring_database: 'משחזר מסד נתונים...',
-    restore_database_button: 'שחזור מסד נתונים',
-    restore_blocked_message: "שחזור מסד הנתונים חסום כרגע.",
+    // Context menu
+    system_status: "מצב מערכת",
+    database_status: "מצב מסד נתונים",
+    backend_status: "מצב שרת",
+    connected: "מחובר",
+    disconnected: "מנותק",
 
     qr_codes_report: "הדפס קודי QR",
     qr_codes_available: "ישנם {count} קודי QR זמינים.",

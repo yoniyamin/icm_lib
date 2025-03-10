@@ -14,8 +14,14 @@ export async function fetchAvailableBooks() {
 }
 
 export async function fetchBorrowedBooks() {
-    const response = await axios.get(`${BASE_URL}/api/borrowed_books`);
-    return await response.data;
+    try {
+        const response = await axios.get(`${BASE_URL}/api/borrowed_books`);
+        console.log("Borrowed Books Response:", response.data); // Debug log
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching borrowed books:", error.response || error);
+        throw error;
+    }
 }
 
 export async function fetchBookByQRCode(qrCode) {

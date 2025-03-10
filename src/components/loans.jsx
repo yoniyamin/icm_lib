@@ -398,15 +398,6 @@ function Loans() {
                 </div>
             )}
             <div className="flex gap-4 mb-4">
-                {/* Language Toggle Button */}
-                <div className="absolute top-2 left-2">
-                    <button
-                        className="w-10 h-10 flex items-center justify-center rounded-full border border-teal-500 bg-white/50 text-teal-500 shadow-md"
-                        onClick={toggleLanguage}
-                    >
-                        {language === 'en' ? 'HE' : 'EN'}
-                    </button>
-                </div>
                 <button
                     className={`flex-1 py-2 px-4 rounded ${scanMode === 'borrow' ? 'text-white' : 'text-gray-800'}`}
                     style={{
@@ -608,8 +599,11 @@ function Loans() {
                                 const matchingBook = borrowedBooks.find((book) => book.qr_code === qrCode);
 
                                 if (matchingBook) {
+                                    setSelectedBorrowedBook(matchingBook); // 🔥 Ensure book object is stored
                                     setSelectedBook(matchingBook);
                                     setBookState(matchingBook.delivery_status || '');
+                                } else {
+                                    setSelectedBorrowedBook(null); // 🔥 Prevent null references
                                 }
                             }}
                             className="w-full p-2 border rounded"

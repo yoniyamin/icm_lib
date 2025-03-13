@@ -55,6 +55,7 @@ export const FIELD_LABELS = {
     members_list_title: 'Library Members',
     no_members_found: 'No members found',
     select_all: 'Select All',
+    deselect_all: 'Deselect All',
     borrowed_books_label: 'Borrowed books',
 
     // Form Placeholders and Labels
@@ -153,16 +154,16 @@ export const FIELD_LABELS = {
     backend_status: "Backend Status",
     connected: "Connected",
     disconnected: "Disconnected",
+    logout: "Logout",
+    navigate: "Navigate",
 
     qr_codes_report: "Print QR Codes",
     qr_codes_available: "There are {count} QR codes available.",
     qr_codes_description: "This report generates a printable PDF of QR codes arranged in a grid with cutting guides.",
     inventory_report_description: "This report generates an Excel file with current inventory details. You can sort the data by various fields and choose to include borrowed items.",
     loans_report_description: "This report generates an Excel file of active loans. You can choose to include historical loans and sort by various fields.",
-    start_qr: "From QR ID",
-    end_qr: "End QR ID",
-    end_qr_exceed_error: "End QR ID cannot exceed {qrCount}.",
-    from_qr_greater_error: "From QR ID cannot be greater than To QR ID.",
+    no_qr_codes: "No QR Codes",
+    qr_codes: "QR Codes",
 
     // QR Code Scanner Labels
     qr_scan_failed: "Scan Failed",

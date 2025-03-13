@@ -48,17 +48,25 @@ export const generateInventoryReport = async (orderBy = 'desc', sortField = 'tit
     }
 };
 
-export const generateQrCodesReport = async (startQr, endQr) => {
+export const fetchQrCodesWithTitles = async () => {
     try {
-        const data = { start_qr: startQr, end_qr: endQr };
-        const response = await axiosInstance.post(
-            `/api/reports/qr_codes`,
-            data,
-            {
-                headers: { 'Accept-Language': language },
-                responseType: 'blob', // Receive binary PDF data
-            }
-        );
+        const response = await axiosInstance.get('/api/qr_codes_with_titles');
+        return response.data; // Array of objects: [{ qr_code, title, ... }, ...]
+    } catch (error) {
+        console.error('Error fetching QR codes with titles:', error);
+        throw error;
+    }
+};
+
+export const generateQrCodesReport = async (selectedQrCodes) => {
+    try {
+        // The data object we send to the backend
+        const data = { selected_qr_codes: selectedQrCodes };
+
+        const response = await axiosInstance.post('/api/reports/qr_codes', data, {
+            headers: { 'Accept-Language': language },
+            responseType: 'blob', // We'll receive binary PDF data
+        });
         return response.data;
     } catch (error) {
         console.error('Error generating QR codes report:', error);
@@ -66,14 +74,3 @@ export const generateQrCodesReport = async (startQr, endQr) => {
     }
 };
 
-export const fetchQrCodes = async () => {
-    try {
-        const response = await axiosInstance.get(`/api/qr_codes`, {
-            headers: { 'Accept-Language': language },
-        });
-        return response.data; // Expected to be an array of filenames
-    } catch (error) {
-        console.error('Error fetching QR codes:', error);
-        throw error;
-    }
-};

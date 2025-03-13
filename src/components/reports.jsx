@@ -3,7 +3,7 @@ import {
     generateBooksReport,
     generateInventoryReport,
     generateQrCodesReport,
-    fetchQrCodes,
+    fetchQrCodesWithTitles,
 } from '../services/reportsServices';
 import { BarChart2, FileText, Download, Filter } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
@@ -21,9 +21,14 @@ const ReportGenerationTab = () => {
     const [reportType, setReportType] = useState('');
 
     // States for QR Codes PDF report (QR directory is fixed on the backend)
-    const [startQr, setStartQr] = useState('');
-    const [endQr, setEndQr] = useState('');
-    const [qrCount, setQrCount] = useState(null);
+    const [qrCodeList, setQrCodeList] = useState([]);
+    const [allSelected, setAllSelected] = useState(true); // toggles the switch
+    const [rawData, setRawData] = useState([]);
+
+    // Local sorting states for the table
+    const [sortColumn, setSortColumn] = useState('qr_code'); // 'qr_code' or 'title'
+    const [sortAsc, setSortAsc] = useState(true);
+
 
     // Options for sorting (only used for inventory and loans reports)
     const sortOptions = {
@@ -41,39 +46,80 @@ const ReportGenerationTab = () => {
     };
 
     // When the QR Codes report is selected, fetch the available QR codes count
-    // and set defaults (start = 1, end = max).
+    // 1) fetch once on [reportType]
     useEffect(() => {
-        if (reportType === 'qr_codes') {
-            fetchQrCodes()
-                .then((data) => {
-                    const count = data.length;
-                    setQrCount(count);
-                    setStartQr("1");
-                    setEndQr(String(count));
+        if (reportType === "qr_codes") {
+            fetchQrCodesWithTitles()
+                .then(data => {
+                    const withSelected = data.map(i => ({ ...i, selected: true }));
+                    setRawData(withSelected);
                 })
-                .catch((err) => {
-                    console.error('Error fetching QR codes:', err);
-                    setQrCount(0);
+                .catch(err => {
+                    console.error(err);
+                    setRawData([]);
                 });
         }
     }, [reportType]);
 
-    // Disable the generate button if:
-    // - For QR codes: Either field is empty,
-    //                "From QR ID" > "To QR ID",
-    //                or "To QR ID" exceeds the available count.
-    // - Otherwise, disable if sortField is empty.
-    const isGenerateDisabled = () => {
-        if (reportType === 'qr_codes') {
-            if (!startQr || !endQr) return true;
-            const from = parseInt(startQr, 10);
-            const to = parseInt(endQr, 10);
-            if (from > to) return true;
-            if (qrCount !== null && to > qrCount) return true;
-            return false;
-        } else {
-            return !sortField;
+// 2) sort whenever rawData or [sortColumn, sortAsc] changes
+    useEffect(() => {
+        if (reportType === "qr_codes") {
+            // sort rawData
+            const sorted = sortQrList(rawData, sortColumn, sortAsc);
+            setQrCodeList(sorted);
         }
+    }, [rawData, sortColumn, sortAsc, reportType]);
+
+    function sortQrList(qrList, sortColumn, sortAsc) {
+        const newData = [...qrList];
+        newData.sort((a, b) => {
+            if (sortColumn === "qr_code") {
+                // numeric parse
+                const numA = parseQrNumber(a.qr_code);
+                const numB = parseQrNumber(b.qr_code);
+                return sortAsc ? numA - numB : numB - numA;
+            } else if (sortColumn === "title") {
+                // string compare
+                const valA = (a.title || "").toLowerCase();
+                const valB = (b.title || "").toLowerCase();
+                if (valA < valB) return sortAsc ? -1 : 1;
+                if (valA > valB) return sortAsc ? 1 : -1;
+                return 0;
+            }
+            return 0;
+        });
+        return newData;
+    }
+
+    const handleSelectToggle = (index) => {
+        setQrCodeList((prev) => {
+            // Create a deep copy of the array
+            const newList = prev.map(item => ({...item}));
+            // Toggle the selected property of the item at the given index
+            newList[index].selected = !newList[index].selected;
+            return newList;
+        });
+    };
+
+    // Select or deselect *all* codes at once
+    const handleAllSelectedToggle = () => {
+        const newValue = !allSelected;
+        setAllSelected(newValue);
+        setQrCodeList((prev) => prev.map((item) => ({ ...item, selected: newValue })));
+    };
+
+    // A simple helper to disable the "Generate" button if invalid or nothing selected
+    const isGenerateDisabled = () => {
+        if (!reportType) return true;
+
+        if (reportType === 'inventory' || reportType === 'loans') {
+            // require that user chooses a sortField
+            return !sortField;
+        } else if (reportType === 'qr_codes') {
+            // require that at least 1 QR code is selected
+            return !qrCodeList.some((item) => item.selected);
+        }
+        return false;
     };
 
     const generateReport = async () => {
@@ -84,13 +130,17 @@ const ReportGenerationTab = () => {
             } else if (reportType === 'loans') {
                 reportBlob = await generateBooksReport(orderBy, sortField, includeHistory);
             } else if (reportType === 'qr_codes') {
-                reportBlob = await generateQrCodesReport(
-                    parseInt(startQr, 10),
-                    parseInt(endQr, 10)
-                );
+                const selectedCodes = qrCodeList
+                    .filter((item) => item.selected)
+                    .map((item) => item.qr_code);
+                if (selectedCodes.length === 0) {
+                    alert('No QR codes selected!');
+                    return;
+                }
+                reportBlob = await generateQrCodesReport(selectedCodes);
             }
 
-            // Download the generated report (PDF for QR codes, XLSX for others)
+            // Download file
             const url = window.URL.createObjectURL(new Blob([reportBlob]));
             const link = document.createElement('a');
             link.href = url;
@@ -102,9 +152,31 @@ const ReportGenerationTab = () => {
             link.click();
         } catch (error) {
             console.error('Error generating report:', error);
-            alert(LABELS['error_generating_report']);
+            alert(LABELS.error_generating_report || 'Error generating report.');
         }
     };
+
+    // Clickable table header for sorting
+    const handleColumnHeaderClick = (columnName) => {
+        if (sortColumn === columnName) {
+            // if same column, just flip the direction
+            setSortAsc(!sortAsc);
+        } else {
+            // switch to a new column, default ascending
+            setSortColumn(columnName);
+            setSortAsc(true);
+        }
+    };
+
+    function parseQrNumber(qrCode) {
+        // e.g. "qr_for_book_5" => 5
+        // e.g. "qr_for_book_50" => 50
+        // If no digits found, return something like 0 or Infinity
+        const match = qrCode.match(/\d+$/);  // find digits at the end
+        if (!match) return 0; // or Infinity, or -1
+        return parseInt(match[0], 10);
+    }
+
 
 
     return (
@@ -172,68 +244,74 @@ const ReportGenerationTab = () => {
                                 </p>
 
                                 {reportType === 'qr_codes' ? (
-                                    <div className="space-y-3">
-                                        {qrCount !== null && (
-                                            <p className={`text-sm text-purple-600 ${language === 'he' ? 'text-right' : 'text-left'}`}>
-                                                {LABELS['qr_codes_available']
-                                                    ? LABELS['qr_codes_available'].replace('{count}', qrCount)
-                                                    : `There are ${qrCount} QR codes available.`}
-                                            </p>
-                                        )}
-                                        <div className="flex flex-row items-end gap-4">
-                                            <div className="flex flex-col flex-1">
-                                                <label className="text-xs">
-                                                    {LABELS['start_qr'] || 'From QR ID'}
-                                                </label>
+                                    <div className="space-y-4">
+                                        {/* Toggle Switch for Select All */}
+                                        <div className="flex items-center gap-3">
+                                            <span>{LABELS.select_all || 'Select All'}</span>
+                                            <label className="switch">
                                                 <input
-                                                    type="number"
-                                                    min="1"
-                                                    value={startQr}
-                                                    onChange={(e) => setStartQr(e.target.value)}
-                                                    onBlur={() => {
-                                                        const s = parseInt(startQr, 10);
-                                                        if (isNaN(s) || s < 1) {
-                                                            setStartQr("1");
-                                                        }
-                                                    }}
-                                                    className="border rounded-md p-1 w-full"
+                                                    type="checkbox"
+                                                    checked={allSelected}
+                                                    onChange={handleAllSelectedToggle}
                                                 />
-                                            </div>
-                                            <div className="flex flex-col flex-1">
-                                                <label className="text-xs">
-                                                    {LABELS['end_qr'] || 'To QR ID'}
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    min="1"
-                                                    max={qrCount || undefined}
-                                                    value={endQr}
-                                                    onChange={(e) => setEndQr(e.target.value)}
-                                                    onBlur={() => {
-                                                        const eVal = parseInt(endQr, 10);
-                                                        if (isNaN(eVal) || eVal < 1) {
-                                                            setEndQr("1");
-                                                        } else if (qrCount !== null && eVal > qrCount) {
-                                                            setEndQr(String(qrCount));
-                                                        }
-                                                    }}
-                                                    className="border rounded-md p-1 w-full"
-                                                />
-                                            </div>
+                                                <span className="slider"></span>
+                                            </label>
                                         </div>
-                                        {parseInt(endQr, 10) > qrCount && (
-                                            <p className="text-red-500 text-sm">
-                                                {LABELS['end_qr_exceed_error']
-                                                    ? LABELS['end_qr_exceed_error'].replace('{qrCount}', qrCount)
-                                                    : `End QR ID cannot exceed ${qrCount}.`}
-                                            </p>
-                                        )}
-                                        {startQr && endQr && parseInt(startQr, 10) > parseInt(endQr, 10) && (
-                                            <p className="text-red-500 text-sm">
-                                                {LABELS['from_qr_greater_error'] ||
-                                                    'From QR ID cannot be greater than To QR ID.'}
-                                            </p>
-                                        )}
+
+                                        {/* Table for the QR items */}
+                                        <table className="qr-table">
+                                            <thead>
+                                            <tr>
+                                                <th
+                                                    style={{width: '40px'}}
+                                                    /* The checkbox column isn't sorted; no onClick here */
+                                                >
+                                                    {/* "Select" column header, do nothing on click */}
+                                                </th>
+                                                <th onClick={() => handleColumnHeaderClick('qr_code')}>
+                                                    {LABELS.qr_code || 'QR Code'}{' '}
+                                                    {sortColumn === 'qr_code' && (sortAsc ? '▲' : '▼')}
+                                                </th>
+                                                <th onClick={() => handleColumnHeaderClick('title')}>
+                                                    {LABELS.book_title || 'Title'}{' '}
+                                                    {sortColumn === 'title' && (sortAsc ? '▲' : '▼')}
+                                                </th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {qrCodeList.map((qrItem, idx) => (
+                                                <tr
+                                                    key={qrItem.qr_code}
+                                                    onClick={() => handleSelectToggle(idx)} // entire row is clickable
+                                                    className="cursor-pointer"
+                                                >
+                                                    <td>
+                                                        {/*
+                                                          Stop the row's onClick from also toggling
+                                                          by calling e.stopPropagation() here
+                                                        */}
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={qrItem.selected}
+                                                            onChange={(e) => {
+                                                                e.stopPropagation(); // prevent the row's onClick
+                                                                handleSelectToggle(idx);
+                                                            }}
+                                                        />
+                                                    </td>
+                                                    <td>{qrItem.qr_code}</td>
+                                                    <td>{qrItem.title || '(No Title)'}</td>
+                                                </tr>
+                                            ))}
+                                            {qrCodeList.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={3} className="text-sm text-gray-500">
+                                                        {LABELS.no_qr_codes || 'No QR codes found.'}
+                                                    </td>
+                                                </tr>
+                                            )}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 ) : (
                                     // For loans and inventory, show toggles, sort, and order options.

@@ -55,6 +55,7 @@ export const FIELD_LABELS = {
     members_list_title: 'חברי הספרייה',
     no_members_found: 'לא נמצאו חברים',
     select_all: 'בחר הכל',
+    deselect_all: 'הסר בחירה',
     borrowed_books_label: 'ספרים מושאלים',
 
     // Form Placeholders and Labels
@@ -154,16 +155,16 @@ export const FIELD_LABELS = {
     backend_status: "מצב שרת",
     connected: "מחובר",
     disconnected: "מנותק",
+    logout: "התנתק",
+    navigate: "לשוניות",
 
     qr_codes_report: "הדפס קודי QR",
     qr_codes_available: "ישנם {count} קודי QR זמינים.",
     qr_codes_description: "דוח זה יפיק קובץ PDF להדפסה של קודי QR המסודרים ברשת עם קווים לחיתוך.",
     inventory_report_description: "דוח זה מייצר קובץ Excel עם פרטי המלאי הנוכחי. ניתן למיין את הנתונים לפי שדות שונים ולבחור לכלול פריטים מושאלים.",
     loans_report_description: "דוח זה מייצר קובץ Excel של הלוואות פעילות. ניתן לבחור לכלול הלוואות היסטוריות ולמיין לפי שדות שונים.",
-    start_qr: "ממזהה QR",
-    end_qr: "עד מזהה QR",
-    end_qr_exceed_error: "מספר ה-QR הסופי לא יכול להיות גדול מ-{qrCount}.",
-    from_qr_greater_error: "מספר ה-QR ההתחלתי לא יכול להיות גדול ממספר ה-QR הסופי.",
+    no_qr_codes: "No QR Codes",
+    qr_codes: "קוד QR",
 
     // QR Code Scanner Labels
     qr_scan_failed: "הסריקה נכשלה",

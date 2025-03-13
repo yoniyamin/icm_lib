@@ -373,6 +373,7 @@ input#search_by_name {
   color: white !important;
 }
 
+
 /* Add touch device optimizations */
 @media (hover: none) {
   .tab-item:active {
@@ -480,4 +481,69 @@ input#search_by_name {
 .borrowed-books-highlight {
   color: red;
   font-weight: bold;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4ECAC7; /* or any color you like */
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* Basic table styling */
+.qr-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.qr-table th,
+.qr-table td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.qr-table th {
+  cursor: pointer; /* Indicate clickable for sorting */
+  background-color: #f7f7f7;
+}
+
+.qr-table th:hover {
+  background-color: #eaeaea;
 }

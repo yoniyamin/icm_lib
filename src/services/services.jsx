@@ -116,15 +116,16 @@ export const addBookService = async (bookData) => {
     }
 };
 
-export const downloadQrCode = async (qrCodeFileName) => {
+export const downloadQrCode = async (qrCodeValue) => {
     try {
-        const response = await axios.get(`${BASE_URL}/api/qr_codes/${qrCodeFileName}`, {
-            responseType: 'blob', // Ensure the response is handled as a file
-        });
+        const response = await axiosInstance.get(
+            `/api/qr_codes/${qrCodeValue}`,
+            { responseType: 'blob' }
+        );
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', qrCodeFileName); // Set the file name
+        link.setAttribute('download', `${qrCodeValue}.png`);
         document.body.appendChild(link);
         link.click();
         link.remove();

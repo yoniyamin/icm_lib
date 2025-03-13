@@ -291,7 +291,7 @@ const Inventory = () => {
                                     </p>
 
                                     <button
-                                        onClick={() => handleDownloadQrCode(`${book.qr_code}.png`)}
+                                        onClick={() => handleDownloadQrCode(`${book.qr_code}`)}
                                         className="text-blue-600 text-sm px-3 py-1 rounded-md border border-blue-600 hover:bg-blue-50 transition-colors duration-200"
                                     >
                                         {LABELS.download_qr_code}

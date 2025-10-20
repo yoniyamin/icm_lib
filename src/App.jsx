@@ -2,10 +2,10 @@
 import React, { useState } from 'react';
 import './App.css';
 import Login from "./components/Login";
-import Inventory from './components/Inventory';
-import Members from './components/Members';
-import Loans from './components/Loans';
-import Reports from './components/Reports';
+import Inventory from './components/inventory';
+import Members from './components/members';
+import Loans from './components/loans';
+import Reports from './components/reports';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { getFieldLabels } from './utils/labels';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@radix-ui/react-tabs';

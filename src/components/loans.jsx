@@ -7,12 +7,63 @@ import { fetchMembers, fetchAvailableBooks, fetchBookByQRCode, borrowBook, retur
 import QRCodeScanner from '../services/QRCodeScanner';
 import { useLanguage } from '../context/LanguageContext';
 import { getFieldLabels } from '../utils/labels';
+import { nameMatchesSearch, compareHebrewNames } from '../utils/nameUtils';
 
 
 const brandColors = {
     coral: '#F38181',
     teal: '#4ECAC7',
     yellow: '#FEC43C',
+};
+
+const getSelectStyles = (isHebrew) => ({
+    control: (provided) => ({
+        ...provided,
+        textAlign: isHebrew ? 'right' : 'left',
+        direction: isHebrew ? 'rtl' : 'ltr',
+        borderColor: brandColors.coral,
+        borderRadius: '4px',
+        boxShadow: 'none',
+        '&:hover': { borderColor: brandColors.teal },
+    }),
+    menu: (provided) => ({
+        ...provided,
+        direction: isHebrew ? 'rtl' : 'ltr',
+        textAlign: isHebrew ? 'right' : 'left',
+    }),
+    option: (provided) => ({
+        ...provided,
+        textAlign: isHebrew ? 'right' : 'left',
+        direction: isHebrew ? 'rtl' : 'ltr',
+    }),
+    input: (provided) => ({
+        ...provided,
+        textAlign: isHebrew ? 'right' : 'left',
+        direction: isHebrew ? 'rtl' : 'ltr',
+    }),
+    singleValue: (provided) => ({
+        ...provided,
+        textAlign: isHebrew ? 'right' : 'left',
+        direction: isHebrew ? 'rtl' : 'ltr',
+    }),
+    placeholder: (provided) => ({
+        ...provided,
+        textAlign: isHebrew ? 'right' : 'left',
+    }),
+    valueContainer: (provided) => ({
+        ...provided,
+        direction: isHebrew ? 'rtl' : 'ltr',
+    }),
+});
+
+const filterBorrowerOption = (option, inputValue) => {
+    if (!inputValue) return true;
+    const { parentName, childName, label } = option.data;
+    return (
+        nameMatchesSearch(label, inputValue) ||
+        nameMatchesSearch(parentName, inputValue) ||
+        nameMatchesSearch(childName, inputValue)
+    );
 };
 
 function Loans() {
@@ -26,7 +77,6 @@ function Loans() {
     const [borrowedBooks, setBorrowedBooks] = useState([]);
     const [selectedBorrowedBookQR, setSelectedBorrowedBookQR] = useState("");
     const [selectedBorrowedBook, setSelectedBorrowedBook] = useState(null);
-    const [selectedBorrowerSuggestions, setSelectedBorrowerSuggestions] = useState([]);
     const [loanHistory, setLoanHistory] = useState([]);
     const [showAllLoans, setShowAllLoans] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
@@ -105,12 +155,14 @@ function Loans() {
         setSelectedBorrower(null);
     }, [scanMode]);
 
-    const borrowerOptions = members.map((member) => ({
-        value: member.id,
-        label: displayParentName ? member.parent_name : member.kid_name,
-        parentName: member.parent_name,
-        childName: member.kid_name
-    }));
+    const borrowerOptions = members
+        .map((member) => ({
+            value: member.id,
+            label: displayParentName ? member.parent_name : member.kid_name,
+            parentName: member.parent_name,
+            childName: member.kid_name,
+        }))
+        .sort((a, b) => compareHebrewNames(a.label, b.label));
 
     const bookOptions = availableBooks.map((book) => ({
         value: book.qr_code,
@@ -375,12 +427,11 @@ function Loans() {
         }
     };
 
-    // Sort loan history
     const sortLoans = (loans) => {
-        return loans.sort((a, b) => {
-            if (!a.return_date && b.return_date) return -1; // Open loans first
-            if (a.return_date && !b.return_date) return 1;
-            return new Date(b.loan_start_date) - new Date(a.loan_start_date); // Most recent first
+        return [...loans].sort((a, b) => {
+            if (!a.returned_at && b.returned_at) return -1;
+            if (a.returned_at && !b.returned_at) return 1;
+            return new Date(b.borrowed_at) - new Date(a.borrowed_at);
         });
     };
 
@@ -436,28 +487,16 @@ function Loans() {
                             onChange={(selectedOption) => {
                                 if (selectedOption) {
                                     const selectedMember = members.find(
-                                        (member) =>
-                                            member.id === selectedOption.value ||
-                                            member.parent_name === selectedOption.label ||
-                                            member.kid_name === selectedOption.label
+                                        (member) => member.id === selectedOption.value
                                     );
                                     setSelectedBorrower(selectedMember || null);
                                 } else {
                                     setSelectedBorrower(null);
                                 }
                             }}
+                            filterOption={filterBorrowerOption}
                             isClearable
-                            styles={{
-                                control: (provided) => ({
-                                    ...provided,
-                                    textAlign: language === 'he' ? 'right' : 'left',
-                                    direction: language === 'he' ? 'rtl' : 'ltr',
-                                    borderColor: brandColors.coral,
-                                    borderRadius: '4px',
-                                    boxShadow: 'none',
-                                    '&:hover': {borderColor: brandColors.teal},
-                                }),
-                            }}
+                            styles={getSelectStyles(language === 'he')}
                             className="w-full flex-grow"
                             classNamePrefix="borrower-select"
                         />
@@ -490,17 +529,7 @@ function Loans() {
                             setBookState(selectedBook?.delivery_status || '');
                         }}
                         isClearable
-                        styles={{
-                            control: (provided) => ({
-                                ...provided,
-                                textAlign: language === 'he' ? 'right' : 'left',
-                                direction: language === 'he' ? 'rtl' : 'ltr',
-                                borderColor: brandColors.coral,
-                                borderRadius: '4px',
-                                boxShadow: 'none',
-                                '&:hover': {borderColor: brandColors.teal},
-                            }),
-                        }}
+                        styles={getSelectStyles(language === 'he')}
                         className="w-full"
                         classNamePrefix="book-select"
                     />

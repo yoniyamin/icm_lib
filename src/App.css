@@ -311,6 +311,20 @@ input#search_by_name {
   direction: rtl;
 }
 
+.rtl .borrower-select__menu,
+.rtl .book-select__menu {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl .borrower-select__input-container,
+.rtl .book-select__input-container,
+.rtl .borrower-select__single-value,
+.rtl .book-select__single-value {
+  direction: rtl;
+  text-align: right;
+}
+
 .ltr .borrower-select__control,
 .ltr .book-select__control {
   text-align: left;

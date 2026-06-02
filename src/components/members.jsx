@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { addMemberService, fetchMembers, fetchMemberLoans, updateMemberService, deleteMemberService } from "../services/services";
 import { useLanguage } from '../context/LanguageContext';
 import { getFieldLabels } from '../utils/labels';
+import { memberMatchesSearch, compareHebrewNames } from '../utils/nameUtils';
 import { Edit, Trash2, Info } from 'lucide-react';
 
 function Members() {
@@ -122,22 +123,18 @@ function Members() {
         }
     };
 
-    // Step 1: Filter members based on the search term
     const filteredMembers = Array.isArray(members)
-        ? members.filter((member) =>
-            member.parent_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            member.kid_name.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+        ? members.filter((member) => memberMatchesSearch(member, searchTerm))
         : [];
 
-    // Step 2: Sort members so those who borrowed more than 2 books appear first
     const sortedMembers = [...filteredMembers].sort((a, b) => {
         const aBooks = a.borrowed_books_count || 0;
         const bBooks = b.borrowed_books_count || 0;
 
-        if (aBooks > 2 && bBooks <= 2) return -1; // Move 'a' to the top
-        if (bBooks > 2 && aBooks <= 2) return 1;  // Move 'b' to the top
-        return 0;
+        if (aBooks > 2 && bBooks <= 2) return -1;
+        if (bBooks > 2 && aBooks <= 2) return 1;
+        if (bBooks !== aBooks) return bBooks - aBooks;
+        return compareHebrewNames(a.parent_name, b.parent_name);
     });
 
     return (
@@ -196,7 +193,8 @@ function Members() {
                 placeholder={LABELS.search_placeholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`input w-full border border-gray-300 rounded-md py-2 px-4 mb-4 ${language === 'he' ? 'text-right' : 'text-left'} ${language === 'he' ? 'rtl' : 'ltr'}`}
+                dir={direction}
+                className={`input w-full border border-gray-300 rounded-md py-2 px-4 mb-4 ${language === 'he' ? 'text-right rtl' : 'text-left ltr'}`}
             />
 
             {/* Member List */}

@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, Edit } from 'lucide-react';
 import { fetchBooks, addBookService, fetchMembers, downloadQrCode , updateBookService  } from '../services/services';
 import { useLanguage } from '../context/LanguageContext';
 import {getFieldLabels, translateBookCondition, translateCoverType} from '../utils/labels';
+import { nameMatchesSearch } from '../utils/nameUtils';
 
 const Inventory = () => {
     const [books, setBooks] = useState([]);
@@ -157,7 +158,8 @@ const Inventory = () => {
                     placeholder={LABELS.search_books_placeholder}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className={`flex-1 border border-gray-300 rounded-md py-1.5 px-4 ${language === 'he' ? 'text-right' : 'text-left'}`}
+                    dir={direction}
+                    className={`flex-1 border border-gray-300 rounded-md py-1.5 px-4 ${language === 'he' ? 'text-right rtl' : 'text-left ltr'}`}
                 />
             </div>
 
@@ -271,8 +273,8 @@ const Inventory = () => {
                 <div className="overflow-y-auto max-h-screen border-t pt-4">
                     {books
                         .filter(book =>
-                            book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            book.author.toLowerCase().includes(searchTerm.toLowerCase())
+                            nameMatchesSearch(book.title, searchTerm) ||
+                            nameMatchesSearch(book.author, searchTerm)
                         )
                         .map((book) => (
                             <div key={book.qr_code} className="bg-gray-50 shadow-sm rounded-lg p-4 mb-2 relative">

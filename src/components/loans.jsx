@@ -66,6 +66,16 @@ const filterBorrowerOption = (option, inputValue) => {
     );
 };
 
+const filterBookOption = (option, inputValue) => {
+    if (!inputValue) return true;
+    const { label, author, borrowingChild } = option.data;
+    return (
+        nameMatchesSearch(label, inputValue) ||
+        nameMatchesSearch(author, inputValue) ||
+        nameMatchesSearch(borrowingChild, inputValue)
+    );
+};
+
 function Loans() {
     const [scanMode, setScanMode] = useState('');
     const [members, setMembers] = useState([]);
@@ -168,6 +178,15 @@ function Loans() {
         value: book.qr_code,
         label: book.title,
     }));
+
+    const borrowedBookOptions = borrowedBooks
+        .map((book) => ({
+            value: book.qr_code,
+            label: book.title,
+            author: book.author,
+            borrowingChild: book.borrowing_child,
+        }))
+        .sort((a, b) => compareHebrewNames(a.label, b.label));
 
     const handleLoanCardClick = (loan) => {
         if (!loan.returned_at) {
@@ -619,34 +638,37 @@ function Loans() {
             {scanMode === 'return' && (
                 <div className="mt-6">
                     <div className="mt-4">
-                        <select
-                            value={selectedBorrowedBookQR || ''}
-                            onChange={(e) => {
-                                const qrCode = e.target.value;
-                                setSelectedBorrowedBookQR(qrCode);
-
-                                const matchingBook = borrowedBooks.find((book) => book.qr_code === qrCode);
-
-                                if (matchingBook) {
-                                    setSelectedBorrowedBook(matchingBook); // 🔥 Ensure book object is stored
-                                    setSelectedBook(matchingBook);
-                                    setBookState(matchingBook.delivery_status || '');
+                        <Select
+                            options={borrowedBookOptions}
+                            placeholder={LABELS.Select_Book}
+                            value={selectedBorrowedBook ? {
+                                value: selectedBorrowedBook.qr_code,
+                                label: selectedBorrowedBook.title,
+                            } : null}
+                            onChange={(selectedOption) => {
+                                if (selectedOption) {
+                                    const matchingBook = borrowedBooks.find(
+                                        (book) => book.qr_code === selectedOption.value
+                                    );
+                                    setSelectedBorrowedBookQR(selectedOption.value);
+                                    setSelectedBorrowedBook(matchingBook || null);
+                                    if (matchingBook) {
+                                        setSelectedBook(matchingBook);
+                                        setBookState(matchingBook.delivery_status || '');
+                                    }
                                 } else {
-                                    setSelectedBorrowedBook(null); // 🔥 Prevent null references
+                                    setSelectedBorrowedBookQR('');
+                                    setSelectedBorrowedBook(null);
+                                    setSelectedBook(null);
+                                    setBookState('');
                                 }
                             }}
-                            className="w-full p-2 border rounded"
-                            style={{borderColor: brandColors.coral,
-                                    textAlign: language === 'he' ? 'right' : 'left',
-                                    direction: language === 'he' ? 'rtl' : 'ltr',}}
-                        >
-                            <option value="">{LABELS.Select_Book}</option>
-                            {borrowedBooks.map((book) => (
-                                <option key={book.qr_code} value={book.qr_code}>
-                                    {book.title}
-                                </option>
-                            ))}
-                        </select>
+                            filterOption={filterBookOption}
+                            isClearable
+                            styles={getSelectStyles(language === 'he')}
+                            className="w-full"
+                            classNamePrefix="book-select"
+                        />
                     </div>
                     <div className="mt-4">
                         {/* QR Code Scan Button */}

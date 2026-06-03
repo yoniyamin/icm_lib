@@ -52,16 +52,14 @@ const Login = ({ onLogin }) => {
     return (
 
         <div
-            className={`min-h-screen relative flex items-center justify-center ${direction === 'rtl' ? 'rtl' : 'ltr'}`}>
-            {/* Background Image - Lower z-index */}
+            className={`min-h-screen w-full relative flex items-center justify-center ${direction === 'rtl' ? 'rtl' : 'ltr'}`}>
+            {/* Background Image - full viewport */}
             <div
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
+                className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-20 pointer-events-none"
                 style={{
                     backgroundImage: `url(${BookshelfImage})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    zIndex: 0
                 }}
+                aria-hidden="true"
             />
 
             <div className="absolute top-2 right-2 flex items-center">

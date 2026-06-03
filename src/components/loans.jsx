@@ -123,6 +123,25 @@ const getApiErrorMessage = (error, fallback) => (
     fallback
 );
 
+const bookMatchesMemberWithLoans = (book, member, loans) => {
+    if (!member) return true;
+    if (nameMatchesSearch(book.borrowing_child, member.kid_name)) return true;
+    const openLoan = loans.find((loan) => !loan.returned_at && loan.book_id === book.id);
+    return openLoan ? loanMatchesMember(openLoan, member) : false;
+};
+
+const findMemberForBorrowedBook = (book, loans, membersList, existingFilter = null) => {
+    if (existingFilter) return existingFilter;
+    const openLoan = loans.find((loan) => !loan.returned_at && loan.book_id === book.id);
+    if (openLoan) return findMemberFromLoan(membersList, openLoan);
+    return membersList.find((member) => nameMatchesSearch(book.borrowing_child, member.kid_name)) || null;
+};
+
+const memberHasRemainingBorrowedBooks = (member, books, loans) => {
+    if (!member) return false;
+    return books.some((book) => bookMatchesMemberWithLoans(book, member, loans));
+};
+
 const getRecentBorrowerIdsFromLoans = (loans, members, limit = MAX_RECENT_BORROWERS) => {
     const sorted = [...loans].sort(
         (a, b) => new Date(b.borrowed_at) - new Date(a.borrowed_at)
@@ -598,6 +617,12 @@ function Loans() {
         }
 
         const bookTitle = selectedBorrowedBook.title;
+        const returningMember = findMemberForBorrowedBook(
+            selectedBorrowedBook,
+            loanHistory,
+            members,
+            returnBorrowerFilter
+        );
 
         returnInFlightRef.current = true;
         setIsSubmittingReturn(true);
@@ -619,9 +644,19 @@ function Loans() {
                     fetchLoanHistory(null, showAllLoans),
                 ]);
 
+                const sortedHistory = sortLoans(updatedLoanHistory);
+
                 setAvailableBooks(updatedAvailableBooks);
                 setBorrowedBooks(updatedBorrowedBooks);
-                setLoanHistory(sortLoans(updatedLoanHistory));
+                setLoanHistory(sortedHistory);
+
+                if (memberHasRemainingBorrowedBooks(returningMember, updatedBorrowedBooks, sortedHistory)) {
+                    setReturnSearchMode('borrower');
+                    setReturnBorrowerFilter(returningMember);
+                } else {
+                    setReturnSearchMode('book');
+                    setReturnBorrowerFilter(null);
+                }
             } else {
                 showFeedback('error', getApiErrorMessage(response, LABELS.return_error));
             }

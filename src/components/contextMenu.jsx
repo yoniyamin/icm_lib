@@ -4,10 +4,12 @@ import { LogOut, Globe, Activity, X, Menu, BookOpen, QrCode, Users, BarChart } f
 import { useLanguage } from '../context/LanguageContext';
 import { getFieldLabels } from '../utils/labels';
 import { checkBackendStatus, checkNeonDBStatus } from '../services/services.jsx';
+import { APP_VERSION, getChangelogItems } from '../utils/changelog';
 
 // eslint-disable-next-line react/prop-types
 const ContextMenu = ({ onLogout, onNavigate, activeTab}) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [showChangelog, setShowChangelog] = useState(false);
     const [backendUp, setBackendUp] = useState(false);
     const [dbUp, setDbUp] = useState(false);
     const { language, toggleLanguage, direction } = useLanguage();
@@ -44,6 +46,7 @@ const ContextMenu = ({ onLogout, onNavigate, activeTab}) => {
 
     // Use language to determine position: Hebrew => left, English => right
     const positionClass = language === 'he' ? 'left-4' : 'right-4';
+    const changelogItems = getChangelogItems(language);
 
     // Define navigation items matching your tabs (adjust labels as needed)
     const navigationItems = [
@@ -77,9 +80,21 @@ const ContextMenu = ({ onLogout, onNavigate, activeTab}) => {
                     className={`fixed top-16 ${positionClass} z-50 bg-white rounded-lg shadow-lg p-2 border border-gray-200 ${direction === 'rtl' ? 'rtl text-right' : 'ltr text-left'}`}
                 >
                     <ul className="space-y-1 w-48">
-                        {/* System Status */}
-                        <li className="px-3 py-2 text-sm font-medium text-gray-700 border-b border-gray-200">
-                            {LABELS.system_status || "System Status"}
+                        {/* System Status + Version */}
+                        <li className="px-3 py-2 flex items-center justify-between gap-2 border-b border-gray-200">
+                            <span className="text-sm font-medium text-gray-700">
+                                {LABELS.system_status || "System Status"}
+                            </span>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowChangelog(true);
+                                    setIsOpen(false);
+                                }}
+                                className="text-xs text-gray-400 hover:text-gray-600 hover:underline shrink-0"
+                            >
+                                v{APP_VERSION}
+                            </button>
                         </li>
 
                         {/* Backend Status */}
@@ -173,6 +188,51 @@ const ContextMenu = ({ onLogout, onNavigate, activeTab}) => {
                             </button>
                         </li>
                     </ul>
+                </div>
+            )}
+
+            {showChangelog && (
+                <div
+                    className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/40 p-4"
+                    onClick={() => setShowChangelog(false)}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="changelog-title"
+                >
+                    <div
+                        className={`bg-white rounded-lg shadow-xl w-full max-w-sm max-h-[80vh] overflow-hidden ${direction === 'rtl' ? 'rtl text-right' : 'ltr text-left'}`}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-gray-200">
+                            <h2 id="changelog-title" className="text-base font-semibold text-gray-800">
+                                {LABELS.whats_new} (v{APP_VERSION})
+                            </h2>
+                            <button
+                                type="button"
+                                onClick={() => setShowChangelog(false)}
+                                className="text-gray-500 hover:text-gray-700"
+                                aria-label={LABELS.close}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <ul className="px-4 py-3 space-y-3 overflow-y-auto max-h-[60vh] text-sm text-gray-700 leading-relaxed list-disc marker:text-gray-400">
+                            {changelogItems.map((item) => (
+                                <li key={item} className={direction === 'rtl' ? 'mr-4' : 'ml-4'}>
+                                    {item}
+                                </li>
+                            ))}
+                        </ul>
+                        <div className="px-4 py-3 border-t border-gray-200">
+                            <button
+                                type="button"
+                                onClick={() => setShowChangelog(false)}
+                                className="w-full py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                            >
+                                {LABELS.close}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

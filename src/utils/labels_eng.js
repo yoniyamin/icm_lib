@@ -154,6 +154,8 @@ export const FIELD_LABELS = {
 
     // Context menu
     system_status: "System Status",
+    whats_new: "What's New",
+    close: "Close",
     database_status: "Database Status",
     backend_status: "Backend Status",
     connected: "Connected",

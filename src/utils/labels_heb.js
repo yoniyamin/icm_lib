@@ -155,6 +155,8 @@ export const FIELD_LABELS = {
 
     // Context menu
     system_status: "מצב מערכת",
+    whats_new: "מה חדש",
+    close: "סגור",
     database_status: "מצב מסד נתונים",
     backend_status: "מצב שרת",
     connected: "מחובר",

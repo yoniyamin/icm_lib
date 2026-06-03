@@ -10,11 +10,35 @@ import { getFieldLabels } from '../utils/labels';
 import { nameMatchesSearch, compareHebrewNames } from '../utils/nameUtils';
 
 
+const RECENT_BORROWERS_KEY = 'icm_recent_borrowers';
+const MAX_RECENT_BORROWERS = 2;
+const DEFAULT_BOOK_STATE = 'מצויין - בלאי בלתי מורגש';
+
 const brandColors = {
     coral: '#F38181',
     teal: '#4ECAC7',
     yellow: '#FEC43C',
 };
+
+const loadRecentBorrowerIds = () => {
+    try {
+        const stored = localStorage.getItem(RECENT_BORROWERS_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch {
+        return [];
+    }
+};
+
+const saveRecentBorrowerIds = (ids) => {
+    localStorage.setItem(RECENT_BORROWERS_KEY, JSON.stringify(ids));
+};
+
+const memberToBorrowerOption = (member, displayParentName) => ({
+    value: member.id,
+    label: displayParentName ? member.parent_name : member.kid_name,
+    parentName: member.parent_name,
+    childName: member.kid_name,
+});
 
 const getSelectStyles = (isHebrew) => ({
     control: (provided) => ({
@@ -54,6 +78,16 @@ const getSelectStyles = (isHebrew) => ({
         ...provided,
         direction: isHebrew ? 'rtl' : 'ltr',
     }),
+    groupHeading: (provided) => ({
+        ...provided,
+        fontSize: '0.75rem',
+        fontWeight: 600,
+        color: '#6b7280',
+        textTransform: 'none',
+        borderBottom: '1px solid #e5e7eb',
+        margin: '4px 8px 0',
+        padding: '4px 0 6px',
+    }),
 });
 
 const filterBorrowerOption = (option, inputValue) => {
@@ -68,13 +102,26 @@ const filterBorrowerOption = (option, inputValue) => {
 
 const filterBookOption = (option, inputValue) => {
     if (!inputValue) return true;
-    const { label, author, borrowingChild } = option.data;
+    const { label, author, borrowingChild, borrowerName } = option.data;
     return (
         nameMatchesSearch(label, inputValue) ||
         nameMatchesSearch(author, inputValue) ||
-        nameMatchesSearch(borrowingChild, inputValue)
+        nameMatchesSearch(borrowingChild, inputValue) ||
+        nameMatchesSearch(borrowerName, inputValue)
     );
 };
+
+const loanMatchesMember = (loan, member) => {
+    if (!member) return true;
+    const parentMatches = nameMatchesSearch(loan.borrower_name, member.parent_name);
+    const childMatches = !loan.borrower_child || nameMatchesSearch(loan.borrower_child, member.kid_name);
+    return parentMatches && childMatches;
+};
+
+const findMemberFromLoan = (members, loan) => (
+    members.find((member) => loanMatchesMember(loan, member)) ||
+    members.find((member) => nameMatchesSearch(member.parent_name, loan.borrower_name))
+);
 
 function Loans() {
     const [scanMode, setScanMode] = useState('');
@@ -83,7 +130,6 @@ function Loans() {
     const [selectedBorrower, setSelectedBorrower] = useState('');
     const [selectedBookQR, setSelectedBookQR] = useState('');
     const [selectedBook, setSelectedBook] = useState(null);
-    const [bookState, setBookState] = useState('');
     const [borrowedBooks, setBorrowedBooks] = useState([]);
     const [selectedBorrowedBookQR, setSelectedBorrowedBookQR] = useState("");
     const [selectedBorrowedBook, setSelectedBorrowedBook] = useState(null);
@@ -98,6 +144,9 @@ function Loans() {
     const { language, toggleLanguage, direction } = useLanguage();
     const LABELS = getFieldLabels(language);
     const [displayParentName, setDisplayParentName] = useState(true);
+    const [recentBorrowerIds, setRecentBorrowerIds] = useState(loadRecentBorrowerIds);
+    const [returnSearchMode, setReturnSearchMode] = useState('book');
+    const [returnBorrowerFilter, setReturnBorrowerFilter] = useState(null);
 
 
 
@@ -161,17 +210,56 @@ function Loans() {
         setSelectedBookQR('');
         setSelectedBorrowedBook(null);
         setSelectedBorrowedBookQR('');
-        setBookState('');
         setSelectedBorrower(null);
+        setReturnSearchMode('book');
+        setReturnBorrowerFilter(null);
     }, [scanMode]);
 
+    const recordRecentBorrower = (memberId) => {
+        setRecentBorrowerIds((prev) => {
+            const updated = [memberId, ...prev.filter((id) => id !== memberId)].slice(0, MAX_RECENT_BORROWERS);
+            saveRecentBorrowerIds(updated);
+            return updated;
+        });
+    };
+
+    const buildBorrowerSelectOptions = () => {
+        const toOption = (member) => memberToBorrowerOption(member, displayParentName);
+
+        const recentMembers = recentBorrowerIds
+            .map((id) => members.find((member) => member.id === id))
+            .filter(Boolean)
+            .slice(0, MAX_RECENT_BORROWERS);
+
+        const recentIdSet = new Set(recentMembers.map((member) => member.id));
+
+        const sortedMembers = members
+            .filter((member) => !recentIdSet.has(member.id))
+            .map(toOption)
+            .sort((a, b) => compareHebrewNames(a.label, b.label));
+
+        if (recentMembers.length === 0) {
+            return members
+                .map(toOption)
+                .sort((a, b) => compareHebrewNames(a.label, b.label));
+        }
+
+        return [
+            {
+                label: 'recent',
+                options: recentMembers.map(toOption),
+            },
+            {
+                label: 'all',
+                options: sortedMembers,
+            },
+        ];
+    };
+
+    const borrowerSelectOptions = buildBorrowerSelectOptions();
+
     const borrowerOptions = members
-        .map((member) => ({
-            value: member.id,
-            label: displayParentName ? member.parent_name : member.kid_name,
-            parentName: member.parent_name,
-            childName: member.kid_name,
-        }))
+        .map((member) => memberToBorrowerOption(member, displayParentName))
         .sort((a, b) => compareHebrewNames(a.label, b.label));
 
     const bookOptions = availableBooks.map((book) => ({
@@ -179,14 +267,49 @@ function Loans() {
         label: book.title,
     }));
 
+    const getBorrowerNameForBook = (book) => {
+        const openLoan = loanHistory.find(
+            (loan) => !loan.returned_at && loan.book_id === book.id
+        );
+        return openLoan?.borrower_name || book.borrowing_parent || book.parent_name || '';
+    };
+
+    const bookMatchesMember = (book, member) => {
+        if (!member) return true;
+        if (nameMatchesSearch(book.borrowing_child, member.kid_name)) return true;
+        const openLoan = loanHistory.find(
+            (loan) => !loan.returned_at && loan.book_id === book.id
+        );
+        return openLoan ? loanMatchesMember(openLoan, member) : false;
+    };
+
     const borrowedBookOptions = borrowedBooks
+        .filter((book) => bookMatchesMember(book, returnBorrowerFilter))
         .map((book) => ({
             value: book.qr_code,
             label: book.title,
             author: book.author,
             borrowingChild: book.borrowing_child,
+            borrowerName: getBorrowerNameForBook(book),
         }))
         .sort((a, b) => compareHebrewNames(a.label, b.label));
+
+    const filteredLoanHistory = returnBorrowerFilter
+        ? loanHistory.filter((loan) => loanMatchesMember(loan, returnBorrowerFilter))
+        : loanHistory;
+
+    const handleBorrowerFilterClick = (event, loan) => {
+        event.stopPropagation();
+        const member = findMemberFromLoan(members, loan);
+        if (!member) return;
+
+        setReturnSearchMode('borrower');
+        setReturnBorrowerFilter(member);
+        setSelectedBorrowedBook(null);
+        setSelectedBorrowedBookQR('');
+        setSelectedBook(null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     const handleLoanCardClick = (loan) => {
         if (!loan.returned_at) {
@@ -196,7 +319,6 @@ function Loans() {
                 setSelectedBorrowedBook(matchingBook);
                 setSelectedBorrowedBookQR(matchingBook.qr_code);
                 setSelectedBook(matchingBook);
-                setBookState(matchingBook.delivery_status || '');
                 window.scrollTo({top: 0, behavior: 'smooth'});
             } else {
                 alert('Book not found in borrowed books.');
@@ -339,8 +461,6 @@ function Loans() {
                     setSelectedBorrowedBook(book);
                 }
 
-                setBookState(book.delivery_status);
-
                 if (book.loan_status === 'borrowed') {
                     const loanInfo = await fetchLoanHistory(decodedText);
                     if (loanInfo && loanInfo.length > 0) {
@@ -380,16 +500,16 @@ function Loans() {
 
     // Handle borrowing of book
     const handleBorrow = async () => {
-        if (selectedBorrower && selectedBook && bookState) {
+        if (selectedBorrower && selectedBook) {
             try {
-                const result = await borrowBook(selectedBook.qr_code, selectedBorrower.id, bookState);
+                const result = await borrowBook(selectedBook.qr_code, selectedBorrower.id, DEFAULT_BOOK_STATE);
                 if (result.message) {
                     alert("Book borrowed successfully!");
+                    recordRecentBorrower(selectedBorrower.id);
 
                     // Reset form and refresh book lists
                     setSelectedBook(null);
                     setSelectedBorrower(null);
-                    setBookState("");
 
                     const updatedAvailableBooks = await fetchAvailableBooks();
                     const updatedBorrowedBooks = await fetchBorrowedBooks();
@@ -405,7 +525,7 @@ function Loans() {
                 console.error("Failed to borrow book:", error);
             }
         } else {
-            alert("Please select a borrower, book, and book state.");
+            alert("Please select a borrower and book.");
         }
     };
 
@@ -428,7 +548,6 @@ function Loans() {
                 setSelectedBorrowedBook(null);
                 setSelectedBorrowedBookQR('');
                 setSelectedBook(null);
-                setBookState('');
 
                 const updatedAvailableBooks = await fetchAvailableBooks();
                 const updatedBorrowedBooks = await fetchBorrowedBooks();
@@ -497,7 +616,7 @@ function Loans() {
                     {/* Borrower Dropdown */}
                     <div className="flex items-center space-x-2">
                         <Select
-                            options={borrowerOptions}
+                            options={borrowerSelectOptions}
                             placeholder={displayParentName ? LABELS.parent_name_placeholder : LABELS.kid_name_placeholder}
                             value={selectedBorrower ? {
                                 value: selectedBorrower.id,
@@ -514,6 +633,9 @@ function Loans() {
                                 }
                             }}
                             filterOption={filterBorrowerOption}
+                            formatGroupLabel={(group) => (
+                                <span>{group.label === 'recent' ? LABELS.recent_borrowers : LABELS.all_borrowers}</span>
+                            )}
                             isClearable
                             styles={getSelectStyles(language === 'he')}
                             className="w-full flex-grow"
@@ -545,7 +667,6 @@ function Loans() {
                             const selectedBook = availableBooks.find((book) => book.qr_code === selectedOption?.value);
                             setSelectedBook(selectedBook || null);
                             setSelectedBookQR(selectedOption?.value || '');
-                            setBookState(selectedBook?.delivery_status || '');
                         }}
                         isClearable
                         styles={getSelectStyles(language === 'he')}
@@ -568,22 +689,6 @@ function Loans() {
                             <p className="text-sm">{LABELS.Select_Book_State}: {selectedBook.book_condition}</p>
                         </div>
                     )}
-
-                    {/* Book State Dropdown */}
-                    {selectedBook && (
-                        <select
-                            className="w-full p-2 border rounded mt-2"
-                            style={{borderColor: brandColors.coral}}
-                            onChange={(e) => setBookState(e.target.value)}
-                            value={bookState}
-                        >
-                            <option value="">{LABELS.Select_Book_State}</option>
-                            <option value="כמו חדש">{LABELS.new}</option>
-                            <option value="מצויין - בלאי בלתי מורגש">{LABELS.good}</option>
-                            <option value="טוב - בלאי קל">{LABELS.worn}</option>
-                        </select>
-                    )}
-
 
                     {/* QR Code Scan Button */}
                     <button
@@ -613,7 +718,6 @@ function Loans() {
                                 onClick={() => {
                                     setSelectedBook(book);
                                     setSelectedBookQR(book.qr_code);
-                                    setBookState(book.delivery_status || '');
                                 }}
                                 style={{cursor: 'pointer'}}
                             >
@@ -637,6 +741,73 @@ function Loans() {
 
             {scanMode === 'return' && (
                 <div className="mt-6">
+                    <div className="flex items-center gap-2 mb-4">
+                        <button
+                            type="button"
+                            className={`flex-1 py-2 px-3 rounded text-sm ${returnSearchMode === 'book' ? 'text-white' : 'text-gray-800'}`}
+                            style={{
+                                backgroundColor: returnSearchMode === 'book' ? brandColors.teal : 'transparent',
+                                borderColor: brandColors.teal,
+                                borderWidth: '1px',
+                            }}
+                            onClick={() => {
+                                setReturnSearchMode('book');
+                                setReturnBorrowerFilter(null);
+                                setSelectedBorrowedBook(null);
+                                setSelectedBorrowedBookQR('');
+                                setSelectedBook(null);
+                            }}
+                        >
+                            {LABELS.search_by_book}
+                        </button>
+                        <button
+                            type="button"
+                            className={`flex-1 py-2 px-3 rounded text-sm ${returnSearchMode === 'borrower' ? 'text-white' : 'text-gray-800'}`}
+                            style={{
+                                backgroundColor: returnSearchMode === 'borrower' ? brandColors.teal : 'transparent',
+                                borderColor: brandColors.teal,
+                                borderWidth: '1px',
+                            }}
+                            onClick={() => setReturnSearchMode('borrower')}
+                        >
+                            {LABELS.search_by_borrower}
+                        </button>
+                    </div>
+
+                    {returnSearchMode === 'borrower' && (
+                        <div className="mt-4">
+                            <Select
+                                options={borrowerOptions}
+                                placeholder={LABELS.select_borrower}
+                                value={returnBorrowerFilter ? {
+                                    value: returnBorrowerFilter.id,
+                                    label: displayParentName
+                                        ? returnBorrowerFilter.parent_name
+                                        : returnBorrowerFilter.kid_name,
+                                } : null}
+                                onChange={(selectedOption) => {
+                                    if (selectedOption) {
+                                        const member = members.find(
+                                            (m) => m.id === selectedOption.value
+                                        );
+                                        setReturnBorrowerFilter(member || null);
+                                    } else {
+                                        setReturnBorrowerFilter(null);
+                                    }
+                                    setSelectedBorrowedBook(null);
+                                    setSelectedBorrowedBookQR('');
+                                    setSelectedBook(null);
+                                }}
+                                filterOption={filterBorrowerOption}
+                                isClearable
+                                styles={getSelectStyles(language === 'he')}
+                                className="w-full"
+                                classNamePrefix="borrower-select"
+                            />
+                        </div>
+                    )}
+
+                    {(returnSearchMode === 'book' || returnBorrowerFilter) && (
                     <div className="mt-4">
                         <Select
                             options={borrowedBookOptions}
@@ -654,13 +825,11 @@ function Loans() {
                                     setSelectedBorrowedBook(matchingBook || null);
                                     if (matchingBook) {
                                         setSelectedBook(matchingBook);
-                                        setBookState(matchingBook.delivery_status || '');
                                     }
                                 } else {
                                     setSelectedBorrowedBookQR('');
                                     setSelectedBorrowedBook(null);
                                     setSelectedBook(null);
-                                    setBookState('');
                                 }
                             }}
                             filterOption={filterBookOption}
@@ -670,6 +839,7 @@ function Loans() {
                             classNamePrefix="book-select"
                         />
                     </div>
+                    )}
                     <div className="mt-4">
                         {/* QR Code Scan Button */}
                         <button
@@ -719,17 +889,17 @@ function Loans() {
 
 
                     {/* Reminder Section */}
-                    {showReminderOptions && loanHistory.filter(loan => !loan.returned_at).length > 0 && (
+                    {showReminderOptions && filteredLoanHistory.filter(loan => !loan.returned_at).length > 0 && (
                         <div className="reminder-section bg-gray-100 p-4 rounded-lg mb-4">
                             <div className="flex items-center justify-between mb-2">
                                 <h3 className="text-lg font-semibold">{LABELS.SendReminders}</h3>
                                 <label className="flex items-center cursor-pointer">
                                     <input
                                         type="checkbox"
-                                        checked={selectedLoansForReminder.length === loanHistory.filter(loan => !loan.returned_at).length}
+                                        checked={selectedLoansForReminder.length === filteredLoanHistory.filter(loan => !loan.returned_at).length}
                                         onChange={(e) => {
                                             if (e.target.checked) {
-                                                const nonReturnedLoans = loanHistory.filter(loan => !loan.returned_at);
+                                                const nonReturnedLoans = filteredLoanHistory.filter(loan => !loan.returned_at);
                                                 setSelectedLoansForReminder(nonReturnedLoans);
                                             } else {
                                                 setSelectedLoansForReminder([]);
@@ -755,9 +925,9 @@ function Loans() {
                         </div>
                     )}
 
-                    {loanHistory.length > 0 && (
+                    {filteredLoanHistory.length > 0 && (
                         <div className={`loan-history-container ${language === 'he' ? 'rtl' : ''}`}>
-                            {loanHistory.map((loan) => (
+                            {filteredLoanHistory.map((loan) => (
                                 <div
                                     className={`loan-history-card ${!loan.returned_at ? 'active-loan' : ''} ${language === 'he' ? 'rtl' : ''}`}
                                     key={loan.id}
@@ -785,7 +955,18 @@ function Loans() {
 
                                     <div className="loan-history-card-body">
                                         <div className="loan-history-card-detail">
-                                            {LABELS.borrowed_by} {loan.borrower_name}
+                                            {LABELS.borrowed_by}{' '}
+                                            {!loan.returned_at ? (
+                                                <button
+                                                    type="button"
+                                                    className="text-teal-600 underline hover:text-teal-800"
+                                                    onClick={(e) => handleBorrowerFilterClick(e, loan)}
+                                                >
+                                                    {loan.borrower_name}
+                                                </button>
+                                            ) : (
+                                                loan.borrower_name
+                                            )}
                                         </div>
                                         <div className="loan-history-card-detail">
                                             {LABELS.kid_name_borrower}: {loan.borrower_child || 'N/A'}

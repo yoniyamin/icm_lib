@@ -44,6 +44,10 @@ export const FIELD_LABELS = {
     reports: "Reports",
     generate_report_button: "Generate report",
     select_borrower: 'Select Borrower',
+    search_by_book: 'Search by Book',
+    search_by_borrower: 'Search by Borrower',
+    recent_borrowers: 'Recent',
+    all_borrowers: 'All Members',
 
     // General Labels
     add_member_button: 'Add Member',

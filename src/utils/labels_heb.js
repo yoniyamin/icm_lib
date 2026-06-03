@@ -44,6 +44,10 @@ export const FIELD_LABELS = {
     reports: "דוחות",
     generate_report_button: "הפק דוח",
     select_borrower: "בחר משאיל",
+    search_by_book: "חיפוש לפי ספר",
+    search_by_borrower: "חיפוש לפי משאיל",
+    recent_borrowers: "אחרונים",
+    all_borrowers: "כל החברים",
 
     // General Labels
     add_member_button: 'הוסף חבר',

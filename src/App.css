@@ -94,7 +94,69 @@
 }
 
 .tabs-content {
-  padding-top: 16px; /* Adjust as needed */
+  padding-top: 16px;
+  width: 100%;
+}
+
+.loans-panel {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: start;
+}
+
+.loans-panel > * {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.loan-action-feedback {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  box-sizing: border-box;
+  text-align: start;
+}
+
+.loan-action-feedback--success {
+  background-color: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+}
+
+.loan-action-feedback--error {
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
+.loan-action-feedback--info {
+  background-color: #eff6ff;
+  border: 1px solid #93c5fd;
+  color: #1e40af;
+}
+
+.loan-action-feedback__dismiss {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.7;
+  padding: 0 2px;
+}
+
+.loan-action-feedback__dismiss:hover {
+  opacity: 1;
 }
 
 .app-container {
@@ -188,34 +250,80 @@ select {
 /* Loan History Cards (General Styling) */
 .loan-history-container {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: stretch;
   gap: 16px;
-  margin-top: 20px;
-  justify-content: center; /* Center items inside the container */
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .loan-history-container.rtl {
-  direction: rtl; /* Ensure entire container respects RTL */
+  direction: rtl;
 }
 
 .loan-history-card {
   width: 100%;
-  max-width: 300px;
-  padding: 16px;
+  max-width: 100%;
+  min-width: 0;
+  align-self: stretch;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
   background-color: #fff;
-  border: 1px solid #ccc;
+  border: none;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: left; /* Default for LTR */
-  display: block; /* 🔥 No more Flex on the card itself */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  text-align: start;
+  display: block;
   transition: background-color 0.3s;
+  overflow: hidden;
+  cursor: pointer;
 }
 
 .loan-history-card.active-loan {
-  background-color: #FEC43C; /* Highlight active loans in yellow */
+  box-shadow: 0 2px 8px rgba(78, 202, 199, 0.35);
 }
 
-.loan-history-card:hover {
+.loan-history-card.active-loan .loan-history-card-header {
+  background-color: #4ECAC7;
+  border-bottom-color: #3db8b5;
+  color: #1f2937;
+}
+
+.loan-history-card.active-loan .loan-history-card-body {
+  background-color: #E6F7F7;
+  border-color: #4ECAC7;
+  color: #374151;
+}
+
+.loan-history-card.active-loan:hover {
+  box-shadow: 0 3px 10px rgba(78, 202, 199, 0.45);
+}
+
+.loan-history-card.returned-loan {
+  cursor: default;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.loan-history-card.returned-loan .loan-history-card-header {
+  background-color: #B8C0CC;
+  border-bottom-color: #A8B0BC;
+  color: #4B5563;
+}
+
+.loan-history-card.returned-loan .loan-history-card-body {
+  background-color: #ECEFF3;
+  border-color: #D1D5DB;
+  color: #6B7280;
+}
+
+.loan-history-card.returned-loan:hover {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.loan-history-card:not(.returned-loan):hover {
   background-color: #f9f9f9;
 }
 
@@ -414,8 +522,7 @@ input#search_by_name {
 
 /* Flexbox fixes for RTL layout */
 .loan-history-container.rtl .loan-history-card {
-  margin-left: auto; /* Reverse margin for proper spacing */
-  margin-right: 0;
+  width: 100%;
 }
 
 /* Header Section */
@@ -423,8 +530,10 @@ input#search_by_name {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #4ECAC7; /* Light teal background */
-  border-bottom: 3px solid #E6F7F7; /* Teal border */
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #4ECAC7;
+  border-bottom: 3px solid #E6F7F7;
   padding: 0.5rem;
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
@@ -432,12 +541,14 @@ input#search_by_name {
 
 /* Body Section */
 .loan-history-card-body {
-  background-color: #E6F7F7; /* Light gray background */
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #E6F7F7;
   padding: 1rem;
   border-bottom-left-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
-  border: 2px solid #E5E7EB; /* Gray border */
-  border-top: none; /* Remove border overlap with the header */
+  border: 2px solid #E5E7EB;
+  border-top: none;
 }
 
 /* Checkbox Styling */

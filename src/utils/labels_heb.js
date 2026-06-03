@@ -184,4 +184,15 @@ export const FIELD_LABELS = {
     qr_cancel: "ביטול",
     processing_image: "מעבד תמונה...",
     error_scanning: "סריקת הקוד נכשלה",
+
+    borrow_success: '{book} הושאל בהצלחה ל{borrower}.',
+    return_success: '{book} הוחזר בהצלחה.',
+    borrowing_in_progress: 'מבצע השאלה...',
+    returning_in_progress: 'מבצע החזרה...',
+    borrow_error: 'השאלת הספר נכשלה. נסה שוב.',
+    return_error: 'החזרת הספר נכשלה. נסה שוב.',
+    select_borrower_and_book: 'יש לבחור משאיל וספר.',
+    select_book_to_return: 'יש לבחור ספר להחזרה.',
+    action_in_progress: 'אנא המתן — הפעולה הקודמת עדיין מתבצעת.',
+    network_error: 'שגיאת חיבור. המתן וודא את התוצאה לפני ניסיון חוזר.',
 };

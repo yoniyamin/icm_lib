@@ -183,4 +183,15 @@ export const FIELD_LABELS = {
     qr_cancel: "Cancel",
     processing_image: "Processing Image...",
     error_scanning: "Scanning of the QR code failed",
+
+    borrow_success: '{book} borrowed successfully to {borrower}.',
+    return_success: '{book} returned successfully.',
+    borrowing_in_progress: 'Borrowing...',
+    returning_in_progress: 'Returning...',
+    borrow_error: 'Failed to borrow the book. Please try again.',
+    return_error: 'Failed to return the book. Please try again.',
+    select_borrower_and_book: 'Please select a borrower and book.',
+    select_book_to_return: 'Please select a book to return.',
+    action_in_progress: 'Please wait — the previous action is still processing.',
+    network_error: 'Connection error. Please wait and verify before trying again.',
 };

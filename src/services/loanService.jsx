@@ -1,6 +1,7 @@
 import axios from "axios";
 import BASE_URL from "../utils/apiConfig";
 import axiosInstance from "./axiosConfig.js";
+import { fetchMemberLoans } from "./services.jsx";
 
 
 export async function fetchBooks() {
@@ -126,6 +127,91 @@ export const fetchLastReminderForLoan = async (loanId) => {
     } catch (error) {
         console.error(`Error fetching last reminder for loan_id ${loanId}:`, error);
         return null;
+    }
+};
+
+const shouldFallbackToPerLoan = (error) => {
+    const status = error.response?.status;
+    if (!status) return false;
+    if (status === 405) return true;
+    if (status === 404) {
+        const data = error.response.data;
+        if (typeof data === "string") return true;
+        if (!data || typeof data !== "object") return true;
+        if (data.success === false && data.error) return false;
+    }
+    return false;
+};
+
+const getOpenMemberLoans = (loans) =>
+    (loans || []).filter((loan) => !loan.returned_at);
+
+const sendMemberReminderPerLoan = async (member, language = "en") => {
+    const loans = await fetchMemberLoans(member.id);
+    const openLoans = getOpenMemberLoans(loans);
+    if (openLoans.length === 0) {
+        return { success: false, error: "No borrowed books", mode: "per_loan" };
+    }
+
+    const subject = language === "he" ? "תזכורת החזרת ספר" : "Book Return Reminder";
+    const borrowerName = member.parent_name;
+
+    const results = await Promise.all(
+        openLoans.map(async (loan) => {
+            const loanId = loan.id ?? loan.loan_id;
+            const response = await sendReminder(
+                loanId,
+                subject,
+                {
+                    borrower_name: borrowerName,
+                    book_title: loan.book_title,
+                    borrowed_at: loan.borrowed_at,
+                },
+                language
+            );
+            return { success: response.success, loanId, error: response.error };
+        })
+    );
+
+    const successful = results.filter((r) => r.success).length;
+    const failed = results.filter((r) => !r.success);
+
+    if (successful > 0) {
+        return {
+            success: true,
+            book_count: successful,
+            failed_count: failed.length,
+            mode: "per_loan",
+            message: failed.length
+                ? `Sent ${successful} of ${openLoans.length} reminders`
+                : `Sent ${successful} reminders`,
+        };
+    }
+
+    const errorMessages = failed.map((f) => f.error).filter(Boolean).join("; ");
+    return {
+        success: false,
+        error: errorMessages || "Failed to send reminders",
+        mode: "per_loan",
+    };
+};
+
+export const sendMemberGeneralReminder = async (member, language = "en") => {
+    const subject = language === "he" ? "תזכורת החזרת ספרים" : "Book Return Reminder";
+
+    try {
+        const response = await axiosInstance.post("/api/send-member-reminder", {
+            member_id: member.id,
+            language,
+            subject,
+        });
+        return { ...response.data, mode: response.data.mode || "combined" };
+    } catch (error) {
+        if (shouldFallbackToPerLoan(error)) {
+            return sendMemberReminderPerLoan(member, language);
+        }
+        const errorMessage = error.response?.data?.error || error.message || "Unknown error";
+        return { success: false, error: errorMessage, mode: "combined" };
     }
 };
 

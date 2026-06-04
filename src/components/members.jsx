@@ -3,7 +3,8 @@ import { addMemberService, fetchMembers, fetchMemberLoans, updateMemberService, 
 import { useLanguage } from '../context/LanguageContext';
 import { getFieldLabels } from '../utils/labels';
 import { memberMatchesSearch, compareHebrewNames } from '../utils/nameUtils';
-import { Edit, Trash2, Info } from 'lucide-react';
+import { Edit, Trash2, Info, Mail } from 'lucide-react';
+import { sendMemberGeneralReminder } from '../services/loanService';
 
 function Members() {
     const [members, setMembers] = useState([]); // Ensure it's initialized as an array
@@ -19,6 +20,7 @@ function Members() {
     const [editingMemberId, setEditingMemberId] = useState(null);
     const [expandedMemberId, setExpandedMemberId] = useState(null);
     const [memberLoans, setMemberLoans] = useState({});
+    const [sendingReminderMemberId, setSendingReminderMemberId] = useState(null);
 
 
 
@@ -106,6 +108,54 @@ function Members() {
     useEffect(() => {
         loadMembers();
     }, []);
+
+    const handleSendMemberReminder = async (member) => {
+        if (!member.email?.trim()) {
+            alert(LABELS.general_reminder_no_email);
+            return;
+        }
+
+        const count = member.borrowed_books_count || 0;
+        if (count === 0) {
+            alert(LABELS.general_reminder_no_books);
+            return;
+        }
+
+        if (!window.confirm(LABELS.confirm_general_reminder.replace("{count}", count))) {
+            return;
+        }
+
+        setSendingReminderMemberId(member.id);
+        try {
+            const result = await sendMemberGeneralReminder(member, language);
+
+            if (result.success) {
+                const bookCount = result.book_count ?? count;
+                if (result.mode === "per_loan") {
+                    if (result.failed_count > 0) {
+                        alert(
+                            LABELS.general_reminder_partial
+                                .replace("{sent}", bookCount)
+                                .replace("{total}", count)
+                        );
+                    } else {
+                        alert(LABELS.general_reminder_success_per_loan.replace("{count}", bookCount));
+                    }
+                } else {
+                    alert(LABELS.general_reminder_success.replace("{count}", bookCount));
+                }
+            } else if (result.error?.includes("already sent recently")) {
+                alert(LABELS.general_reminder_recent);
+            } else {
+                alert(result.error || LABELS.general_reminder_failed);
+            }
+        } catch (error) {
+            console.error("Error sending member reminder:", error);
+            alert(LABELS.general_reminder_failed);
+        } finally {
+            setSendingReminderMemberId(null);
+        }
+    };
 
     const toggleMemberDetails = async (memberId) => {
         if (expandedMemberId === memberId) {
@@ -255,15 +305,25 @@ function Members() {
                                         <Edit size={20}/>
                                     </button>
 
-                                    {/* Only show the info button if there are borrowed books */}
                                     {member.borrowed_books_count > 0 && (
-                                        <button
-                                            onClick={() => toggleMemberDetails(member.id)}
-                                            className="text-gray-600 hover:text-blue-600 transition-colors duration-200"
-                                            aria-label={LABELS.More_Details}
-                                        >
-                                            <Info size={20}/>
-                                        </button>
+                                        <>
+                                            <button
+                                                onClick={() => handleSendMemberReminder(member)}
+                                                disabled={sendingReminderMemberId === member.id}
+                                                className="text-gray-600 hover:text-amber-600 transition-colors duration-200 disabled:opacity-50"
+                                                aria-label={LABELS.send_general_reminder}
+                                                title={LABELS.send_general_reminder}
+                                            >
+                                                <Mail size={20}/>
+                                            </button>
+                                            <button
+                                                onClick={() => toggleMemberDetails(member.id)}
+                                                className="text-gray-600 hover:text-blue-600 transition-colors duration-200"
+                                                aria-label={LABELS.More_Details}
+                                            >
+                                                <Info size={20}/>
+                                            </button>
+                                        </>
                                     )}
                                 </div>
                             </div>

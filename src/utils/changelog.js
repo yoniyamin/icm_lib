@@ -1,7 +1,8 @@
-export const APP_VERSION = '1.0.2';
+export const APP_VERSION = '1.0.3';
 
 export const CHANGELOG = {
     en: [
+        'Members: send one return reminder listing all borrowed books (falls back to per-book emails if needed).',
         'After returning a book, the list stays filtered by that borrower if they still have books out.',
         'Returns: search by borrower, or tap a borrower name on a loan card to see all their books.',
         'Recent borrowers appear at the top of the borrow list and sync across devices.',
@@ -11,6 +12,7 @@ export const CHANGELOG = {
         'Login background now fills the full screen.',
     ],
     he: [
+        'חברים: שליחת תזכורת החזרה אחת עם כל הספרים המושאלים (גיבוי לתזכורת לכל ספר במידת הצורך).',
         'לאחר החזרת ספר, הרשימה נשארת מסוננת לפי המשאיל אם עדיין יש לו ספרים מושאלים.',
         'החזרות: חיפוש לפי משאיל, או לחיצה על שם משאיל בכרטיס השאלה להצגת כל ספריו.',
         'משאילים אחרונים מופיעים בראש רשימת ההשאלה ומסתנכרנים בין מכשירים.',

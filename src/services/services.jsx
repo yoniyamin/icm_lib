@@ -95,7 +95,12 @@ export const deleteMemberService = async (id) => {
 export const fetchBooks = async (orderBy = 'desc') => {
     try {
         const response = await axios.get(`${BASE_URL}/api/books?order_by=${orderBy}`);
-        return response.data;
+        const books = Array.isArray(response.data) ? response.data : [];
+
+        return books.map((book) => ({
+            ...book,
+            borrow_count: book.borrow_count ?? 0,
+        }));
     } catch (error) {
         console.error("Error fetching books:", error);
         throw error;

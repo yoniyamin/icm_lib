@@ -187,6 +187,67 @@ function Members() {
         return compareHebrewNames(a.parent_name, b.parent_name);
     });
 
+    const actionButtonClass = (colorClasses) =>
+        `flex items-center gap-1.5 px-2 py-1.5 min-h-[36px] rounded-md border border-gray-200 bg-white whitespace-nowrap ${colorClasses} ${language === 'he' ? 'flex-row-reverse' : 'flex-row'}`;
+
+    const renderMemberInfo = (member) => (
+        <>
+            <h2 className="font-bold text-gray-800">{LABELS.parent_name_label}: {member.parent_name}</h2>
+            <p className="text-sm text-gray-500">{LABELS.kid_name_label}: {member.kid_name}</p>
+            <p className="text-sm text-gray-500">{LABELS.email_label}: {member.email || LABELS.no_email_provided}</p>
+            <p className={`text-sm mt-2 font-semibold ${member.borrowed_books_count > 2 ? "text-red-500" : "text-gray-700"}`}>
+                {LABELS.borrowed_books_label}: {member.borrowed_books_count}
+            </p>
+        </>
+    );
+
+    const renderMemberActions = (member) => (
+        <>
+            {member.borrowed_books_count === 0 && (
+                <button
+                    onClick={() => handleDeleteMember(member.id)}
+                    className={actionButtonClass('text-gray-600 hover:text-red-600 hover:border-red-200 transition-colors duration-200')}
+                    aria-label={LABELS.delete_member}
+                >
+                    <Trash2 size={16} className="shrink-0"/>
+                    <span className="text-xs">{LABELS.delete_member}</span>
+                </button>
+            )}
+
+            <button
+                onClick={() => handleEditMember(member)}
+                className={actionButtonClass('text-gray-600 hover:text-emerald-600 hover:border-emerald-200 transition-colors duration-200')}
+                aria-label={LABELS.edit_member}
+            >
+                <Edit size={16} className="shrink-0"/>
+                <span className="text-xs">{LABELS.edit_member}</span>
+            </button>
+
+            {member.borrowed_books_count > 0 && (
+                <>
+                    <button
+                        onClick={() => handleSendMemberReminder(member)}
+                        disabled={sendingReminderMemberId === member.id}
+                        className={actionButtonClass('text-gray-600 hover:text-amber-600 hover:border-amber-200 transition-colors duration-200 disabled:opacity-50')}
+                        aria-label={LABELS.send_general_reminder}
+                        title={LABELS.send_general_reminder}
+                    >
+                        <Mail size={16} className="shrink-0"/>
+                        <span className="text-xs">{LABELS.send_general_reminder}</span>
+                    </button>
+                    <button
+                        onClick={() => toggleMemberDetails(member.id)}
+                        className={actionButtonClass('text-gray-600 hover:text-blue-600 hover:border-blue-200 transition-colors duration-200')}
+                        aria-label={expandedMemberId === member.id ? LABELS.Hide_Details : LABELS.More_Details}
+                    >
+                        <Info size={16} className="shrink-0"/>
+                        <span className="text-xs">{expandedMemberId === member.id ? LABELS.Hide_Details : LABELS.More_Details}</span>
+                    </button>
+                </>
+            )}
+        </>
+    );
+
     return (
         <div className="w-full max-w-md mx-auto">
             <button
@@ -249,84 +310,47 @@ function Members() {
 
             {/* Member List */}
             <div dir={direction}>
-                <div className="overflow-y-auto max-h-96 border-t pt-4">
+                <div className="overflow-y-auto max-h-screen border-t pt-4">
                     {sortedMembers.map((member) => (
-                        <div key={member.id} className="bg-gray-50 shadow-sm rounded-lg p-4 mb-2 relative">
-                            <div className="mb-4">
-                                <h2 className="font-bold text-gray-800">{LABELS.parent_name_label}: {member.parent_name}</h2>
-                                <p className="text-sm text-gray-500">{LABELS.kid_name_label}: {member.kid_name}</p>
-                                <p className="text-sm mb-2  text-gray-500">{LABELS.email_label}: {member.email || LABELS.no_email_provided}</p>
-                                <p className={`text-sm mb-2 mt-2 font-semibold ${member.borrowed_books_count > 2 ? "text-red-500" : "text-gray-700"}`}>{LABELS.borrowed_books_label}: {member.borrowed_books_count}</p>
-
-                                {expandedMemberId === member.id && memberLoans[member.id] && (
-                                    <div className="mt-2 p-2 bg-gray-100 rounded">
-                                        <h3 className="font-semibold text-gray-700">{LABELS.borrowed_books_label}</h3>
-                                        <ul>
-                                            {memberLoans[member.id].map((loan, index) => (
-                                                <li key={index} className="text-sm text-gray-600">
-                                                    - {loan.book_title} ({LABELS.borrow_date}: {new Date(loan.borrowed_at).toLocaleDateString()})
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                        <div key={member.id} className="bg-gray-50 shadow-sm rounded-lg p-4 mb-2">
+                            <div
+                                dir="ltr"
+                                className="grid gap-3 items-start w-full"
+                                style={{ gridTemplateColumns: language === 'he' ? 'auto 1fr' : '1fr auto' }}
+                            >
+                                {language === 'he' ? (
+                                    <>
+                                        <div className="flex flex-col gap-1.5 shrink-0">
+                                            {renderMemberActions(member)}
+                                        </div>
+                                        <div dir="rtl" className="min-w-0 text-right">
+                                            {renderMemberInfo(member)}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="min-w-0 text-left">
+                                            {renderMemberInfo(member)}
+                                        </div>
+                                        <div className="flex flex-col gap-1.5 shrink-0">
+                                            {renderMemberActions(member)}
+                                        </div>
+                                    </>
                                 )}
                             </div>
 
-                            {/* Controls */}
-                            <div className="absolute bottom-4 inset-x-4 flex justify-between items-center">
-                                <div className="flex gap-2">
-                                    {member.borrowed_books_count > 0 ? (
-                                        <button
-                                            onClick={() => alert(LABELS.cannot_delete_with_borrowed_books)}
-                                            className="text-gray-400 cursor-not-allowed relative"
-                                            aria-label={LABELS.cannot_delete_with_borrowed_books}
-                                        >
-                                            <Trash2 size={20}/>
-                                            {/* Add diagonal line over the trash icon */}
-                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                <div className="w-[28px] h-[2px] bg-gray-400 rotate-45 absolute"></div>
-                                            </div>
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={() => handleDeleteMember(member.id)}
-                                            className="text-gray-600 hover:text-red-600 transition-colors duration-200"
-                                            aria-label={LABELS.delete_member}
-                                        >
-                                            <Trash2 size={20}/>
-                                        </button>
-                                    )}
-
-                                    <button
-                                        onClick={() => handleEditMember(member)}
-                                        className="text-gray-600 hover:text-emerald-600 transition-colors duration-200"
-                                        aria-label={LABELS.edit_member}
-                                    >
-                                        <Edit size={20}/>
-                                    </button>
-
-                                    {member.borrowed_books_count > 0 && (
-                                        <>
-                                            <button
-                                                onClick={() => handleSendMemberReminder(member)}
-                                                disabled={sendingReminderMemberId === member.id}
-                                                className="text-gray-600 hover:text-amber-600 transition-colors duration-200 disabled:opacity-50"
-                                                aria-label={LABELS.send_general_reminder}
-                                                title={LABELS.send_general_reminder}
-                                            >
-                                                <Mail size={20}/>
-                                            </button>
-                                            <button
-                                                onClick={() => toggleMemberDetails(member.id)}
-                                                className="text-gray-600 hover:text-blue-600 transition-colors duration-200"
-                                                aria-label={LABELS.More_Details}
-                                            >
-                                                <Info size={20}/>
-                                            </button>
-                                        </>
-                                    )}
+                            {expandedMemberId === member.id && memberLoans[member.id] && (
+                                <div className="mt-3 p-3 bg-gray-100 rounded-md">
+                                    <h3 className="font-semibold text-gray-700">{LABELS.borrowed_books_label}</h3>
+                                    <ul>
+                                        {memberLoans[member.id].map((loan, index) => (
+                                            <li key={index} className="text-sm text-gray-600">
+                                                - {loan.book_title} ({LABELS.borrow_date}: {new Date(loan.borrowed_at).toLocaleDateString(language === 'he' ? 'he-IL' : 'en-US')})
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     ))}
                 </div>

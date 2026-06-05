@@ -48,10 +48,20 @@ export const generateInventoryReport = async (orderBy = 'desc', sortField = 'tit
     }
 };
 
-export const fetchQrCodesWithTitles = async () => {
+export const fetchQrCodesWithTitles = async ({ fromDate, toDate } = {}) => {
     try {
-        const response = await axiosInstance.get('/api/qr_codes_with_titles');
-        return response.data; // Array of objects: [{ qr_code, title, ... }, ...]
+        const params = new URLSearchParams();
+        if (fromDate) params.set('from_date', fromDate);
+        if (toDate) params.set('to_date', toDate);
+
+        const query = params.toString();
+        const url = query ? `/api/qr_codes_with_titles?${query}` : '/api/qr_codes_with_titles';
+        const response = await axiosInstance.get(url);
+        const items = Array.isArray(response.data) ? response.data : [];
+        return items.map((item) => ({
+            ...item,
+            created_at: item.created_at ?? item.createdAt ?? null,
+        }));
     } catch (error) {
         console.error('Error fetching QR codes with titles:', error);
         throw error;

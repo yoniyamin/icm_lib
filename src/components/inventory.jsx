@@ -4,6 +4,7 @@ import { fetchBooks, addBookService, fetchMembers, downloadQrCode , updateBookSe
 import { useLanguage } from '../context/LanguageContext';
 import {getFieldLabels, translateBookCondition, translateCoverType} from '../utils/labels';
 import { nameMatchesSearch } from '../utils/nameUtils';
+import { brandColors } from '../utils/brand_colors';
 
 const Inventory = () => {
     const [books, setBooks] = useState([]);
@@ -144,6 +145,20 @@ const Inventory = () => {
             .catch((err) => console.error("Failed to download QR Code:", err));
     };
 
+    const formatTimesBorrowedLabel = (count) =>
+        LABELS.times_borrowed.replace('{count}', count);
+
+    const renderBorrowCountTag = (count) => (
+        <span
+            className="shrink-0 inline-flex items-center justify-center min-w-[2rem] px-2 py-0.5 rounded-full text-xs font-semibold text-white"
+            style={{ backgroundColor: brandColors.teal }}
+            title={formatTimesBorrowedLabel(count)}
+            aria-label={formatTimesBorrowedLabel(count)}
+        >
+            {count}
+        </span>
+    );
+
     return (
         <div className="w-full max-w-md mx-auto">
             {/* Search and Sort Section */}
@@ -277,10 +292,26 @@ const Inventory = () => {
                             nameMatchesSearch(book.author, searchTerm)
                         )
                         .map((book) => (
-                            <div key={book.qr_code} className="bg-gray-50 shadow-sm rounded-lg p-4 mb-2 relative">
+                            <div key={book.qr_code} className="bg-gray-50 shadow-sm rounded-lg p-4 mb-2">
                                 {/* Main content */}
-                                <div className="mb-12">
-                                    <h2 className="font-bold text-gray-800">{book.title}</h2>
+                                <div>
+                                    <div
+                                        dir="ltr"
+                                        className="grid gap-2 items-start w-full mb-1"
+                                        style={{ gridTemplateColumns: language === 'he' ? 'auto 1fr' : '1fr auto' }}
+                                    >
+                                        {language === 'he' ? (
+                                            <>
+                                                {renderBorrowCountTag(book.borrow_count ?? 0)}
+                                                <h2 dir="rtl" className="font-bold text-gray-800 text-right min-w-0">{book.title}</h2>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <h2 className="font-bold text-gray-800 min-w-0">{book.title}</h2>
+                                                {renderBorrowCountTag(book.borrow_count ?? 0)}
+                                            </>
+                                        )}
+                                    </div>
                                     <p className="text-sm text-gray-500">{book.author}</p>
                                     <p className="text-sm mb-4">
                                         <span
@@ -292,48 +323,40 @@ const Inventory = () => {
                                         )}
                                     </p>
 
-                                    <button
-                                        onClick={() => handleDownloadQrCode(`${book.qr_code}`)}
-                                        className="text-blue-600 text-sm px-3 py-1 rounded-md border border-blue-600 hover:bg-blue-50 transition-colors duration-200"
-                                    >
-                                        {LABELS.download_qr_code}
-                                    </button>
-                                </div>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <button
+                                            onClick={() => handleDownloadQrCode(`${book.qr_code}`)}
+                                            className="text-blue-600 text-sm px-3 py-1 rounded-md border border-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                                        >
+                                            {LABELS.download_qr_code}
+                                        </button>
 
-                                {/* Bottom controls */}
-                                <div className="absolute bottom-4 inset-x-4 flex justify-between items-center">
-                                    <button
-                                        onClick={() => handleEditBook(book)}
-                                        className="p-2 text-gray-600 hover:text-emerald-600 transition-colors duration-200"
-                                        aria-label={LABELS.edit_book}
-                                    >
-                                        <Edit size={20}/>
-                                    </button>
+                                        <button
+                                            onClick={() => handleEditBook(book)}
+                                            className="flex items-center justify-center px-3 py-1 min-h-[30px] min-w-[30px] rounded-md border border-gray-200 bg-white text-gray-600 hover:text-emerald-600 hover:border-emerald-200 transition-colors duration-200"
+                                            aria-label={LABELS.edit_book}
+                                            title={LABELS.edit_book}
+                                        >
+                                            <Edit size={16} className="shrink-0"/>
+                                        </button>
 
-                                    <button
-                                        onClick={() => toggleExpand(book.qr_code)}
-                                        className="flex items-center gap-1 text-gray-600 hover:text-indigo-600 transition-colors duration-200"
-                                    >
-                                        {expandedBooks[book.qr_code] ? (
-                                            <>
-                                                <span className="text-sm">{LABELS.Hide_Details}</span>
-                                                <ChevronUp size={20}/>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <span className="text-sm">{LABELS.More_Details}</span>
-                                                <ChevronDown size={20}/>
-                                            </>
-                                        )}
-                                    </button>
-
-                                    <div className="w-8" aria-hidden="true"/>
+                                        <button
+                                            onClick={() => toggleExpand(book.qr_code)}
+                                            className={`flex items-center gap-1 px-3 py-1 min-h-[30px] rounded-md border border-gray-200 bg-white text-gray-600 hover:text-indigo-600 hover:border-indigo-200 transition-colors duration-200 ${language === 'he' ? 'flex-row-reverse' : 'flex-row'}`}
+                                        >
+                                            <span className="text-sm">{expandedBooks[book.qr_code] ? LABELS.Hide_Details : LABELS.More_Details}</span>
+                                            {expandedBooks[book.qr_code] ? (
+                                                <ChevronUp size={16} className="shrink-0"/>
+                                            ) : (
+                                                <ChevronDown size={16} className="shrink-0"/>
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* Expanded details */}
                                 {expandedBooks[book.qr_code] && (
-                                    <div
-                                        className="mt-8 mb-8 text-gray-600 bg-white p-4 rounded-md border border-gray-100">
+                                    <div className="mt-3 text-gray-600 bg-white p-4 rounded-md border border-gray-100">
                                         <p><strong>{LABELS.description}:</strong> {book.description || 'N/A'}</p>
                                         <p>
                                             <strong>{LABELS.year_of_publication}:</strong> {book.year_of_publication || 'N/A'}

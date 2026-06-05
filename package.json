@@ -1,7 +1,7 @@
 {
   "name": "icm-library",
   "homepage": "https://yoniyamin.github.io/icm_lib",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "scripts": {
     "dev": "vite",
